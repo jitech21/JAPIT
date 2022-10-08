@@ -81,10 +81,11 @@ class Validator:
         self.testCaseName = testCaseName
         self.testSuiteName = testSuiteName
         getattr(self, 'Case' + responseFormat)()
+        # TODO: implement config file in apis
 
     def CaseJson(self):
         self.CaseJsonStructure()
-        
+
 
     def CaseText(self):
         # TODO: TBD
@@ -97,6 +98,10 @@ class Validator:
     def CaseArray(self):
         # TODO: TBD
         print("4")
+
+    def CaseList(self):
+        # TODO: TBD
+        print("5")
 
     def CaseJsonStructure(self):
         errorMessage = ""
@@ -242,22 +247,23 @@ if __name__ == "__main__":
                         help="TimeoutForAction delay for provide data for text detection on web site.",
                         type=int
                         )
-    parser.add_argument('--ExpectedValues', required=True,
+    parser.add_argument('--ExpectedValues', required=False,
                         help="ResponseValidator expected response.",
                         type=str
                         )
-    parser.add_argument('--ResponseFormat', required=True,
+    parser.add_argument('--ResponseFormat', required=False,
                         help="ResponseFormat which type of response should be expected. types: (Text, Number, Json, Array, JsonStructure)",
-                        type=str
-                        )
-    parser.add_argument('--ApiNameTestCase', required=True,
-                        help="ApiNameTestCase name of test case",
                         type=str
                         )
     parser.add_argument('--ApiNameTestSuite', required=True,
                         help="ApiNameTestSuite name of test case",
                         type=str
                         )
+    parser.add_argument('--ApiNameTestCase', required=True,
+                        help="ApiNameTestCase name of test case",
+                        type=str
+                        )
+
 
     args = parser.parse_args()
     if args.MethodType == 'POST' and Validator(response=args.RequestData, responseFormat="caseIsJSON") is False:

@@ -1,0 +1,28 @@
+[
+  "request": {
+      "method": "GET",
+      "url": "http://localhost:12000/get?test=test",
+      "responseStatus": 200
+    },
+  {
+    "data": [
+      {
+        "key": "",
+        "valueType": "text",
+        "value": "Test"
+      }, {
+        "key" : "",
+        "valueType": "number",
+        "value": 0
+      },{
+        "key": "",
+        "valueType": "array",
+        "value": "[\"item\"]"
+      },{
+        "key": "",
+        "valueType": "list",
+        "value": "{\"key\": \"value\"}"
+      }
+    ]
+  }
+]
