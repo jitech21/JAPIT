@@ -83,21 +83,8 @@ class Validator:
         getattr(self, 'Case' + responseFormat)()
 
     def CaseJson(self):
-        errorMessage = ""
-        validator = Validator(response=self.response, responseFormat="IsJSON")
-        if self.response.startswith("ERROR:"):
-            errorMessage = self.response
-        elif not validator.CaseIsJSON():
-            errorMessage = "The response is not in json format. \n", self.response
-
-        ResultGenerator(
-            nameReportFolder="reports/",
-            nameReportFile=self.testCaseName,
-            testSuiteName=self.testSuiteName,
-            testCaseName=self.testCaseName,
-            duration=self.duration,
-            testResult=errorMessage
-        )
+        self.CaseJsonStructure()
+        
 
     def CaseText(self):
         # TODO: TBD
@@ -112,8 +99,22 @@ class Validator:
         print("4")
 
     def CaseJsonStructure(self):
-        # TODO: TBD
-        print("5")
+        errorMessage = ""
+        validator = Validator(response=self.response, responseFormat="IsJSON")
+        if self.response.startswith("ERROR:"):
+            errorMessage = self.response
+        elif not validator.CaseIsJSON():
+            errorMessage = "FAILURE: The response is not in json format. \n", self.response
+
+        ResultGenerator(
+            nameReportFolder="reports/",
+            nameReportFile=self.testCaseName,
+            testSuiteName=self.testSuiteName,
+            testCaseName=self.testCaseName,
+            duration=self.duration,
+            testResult=errorMessage
+        )
+        return
 
     def CaseIsJSON(self):
         try:
@@ -126,7 +127,10 @@ class Validator:
 
 class ResultGenerator:
 
-    def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, duration, testResult):
+    def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, duration, testResult, genXMLReport = False):
+        if genXMLReport:
+            self.genXmlReport(self.genReportFromFolder())
+            return
         self.parsedResult = None
         self.testSuiteName = testSuiteName
         self.testCaseName = testCaseName
@@ -135,7 +139,16 @@ class ResultGenerator:
         self.nameReportFolder = nameReportFolder
         self.nameReportFile = nameReportFile
         self.genTmpRepostFile()
-        self.genXmlReport(self.genReportFromFolder())
+
+    def removeLogFileThen(self, nameOfFile):
+        now = datetime.now()
+        parsedDateName = nameOfFile.replace('~' + self.nameReportFile.replace("/", "%") + '.log', '')
+        parsedDateName = parsedDateName.replace('reports/','')
+        print('Remove file: ', parsedDateName)
+
+        if parsedDateName < now.strftime("%Y-%m-%d"):
+            print('Remove file: ', nameOfFile)
+            os.remove(nameOfFile)
 
     def genTmpRepostFile(self):
         self.genFolder()
@@ -159,6 +172,7 @@ class ResultGenerator:
         testSuite = []
         for file in os.listdir(self.nameReportFolder):
             if file.endswith(".log"):
+                self.removeLogFileThen(self.nameReportFolder + file)
                 testSuite.append(
                     self.CreateTestSuite(file=file)
                 )
@@ -197,7 +211,7 @@ class ResultGenerator:
             testCase.add_error_info(message=result, output=result)
         elif result.startswith('DISABLED:'):
             testCase.add_skipped_info(message=result, output=result)
-        elif result != "":
+        elif result.startswith('FAILURE:'):
             testCase.add_failure_info(message=result, output=result)
         return testCase
 
