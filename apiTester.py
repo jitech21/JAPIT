@@ -2,13 +2,12 @@
 API testing tool
 '''
 
-# TODO: implement requests
 # TODO: retest all type of requests
 # TODO: validation of reponse
-## TODO: Json structure
 ## TODO: validate keys
 ## TODO: validate type of value in define keys
-# TODO: authentication via OATH2.0
+# TODO: authentication via OATH2.0 integration with
+# TODO: keycloack one url and another url and then session number
 # TODO: ADD commant
 # TODO: Create documantion on my own Web site
 # TODO. graph around dependency and visual view what working on
@@ -74,18 +73,42 @@ def ApiTester(urlApi, methodType, jsonReq, responseNumber, timeoutForAction, res
 
 
 class Validator:
-    def __init__(self, response, responseFormat, expectedValues="", duration=0.0, testSuiteName="", testCaseName=""):
+    def __init__(self, response, responseFormat="", expectedValues="", duration=0.0, testSuiteName="", testCaseName=""):
         self.response = response
         self.expectedValues = expectedValues
         self.duration = duration
         self.testCaseName = testCaseName
         self.testSuiteName = testSuiteName
-        getattr(self, 'Case' + responseFormat)()
+        responseValidationRules = responseFormat.split('~')
+        if len(responseValidationRules) == 1:
+            getattr(self, 'Case' + responseValidationRules[0])()
+        else:
+            for validationRules in responseValidationRules:
+                getattr(self, 'Case' + validationRules)()
+
         # TODO: implement config file in apis
+        # TODO: many validation rules
+        # TODO: test result: test suite
+        # > testcase data come
+        # > testcase validate structure
+        # >> text
+        # >> number
+        # >> array
+        # >> list
 
     def CaseJson(self):
-        self.CaseJsonStructure()
-
+        ResultGenerator(
+            nameReportFolder="reports/",
+            nameReportFile=self.testCaseName,
+            testSuiteName=self.testSuiteName,
+            testCaseName=self.testCaseName + " - Response come",
+            duration=self.duration,
+            testResult=""
+        )
+        if self.CaseJsonStructure():
+            self.CaseCheckValueInstructure()
+        else:
+            print("The validation is skipping because structure is not valid")
 
     def CaseText(self):
         # TODO: TBD
@@ -103,23 +126,29 @@ class Validator:
         # TODO: TBD
         print("5")
 
+    def CaseCheckValueInstructure(self):
+        # TODO: TBD
+        print("2")
+
     def CaseJsonStructure(self):
         errorMessage = ""
         validator = Validator(response=self.response, responseFormat="IsJSON")
+        isValidStructure = True
         if self.response.startswith("ERROR:"):
             errorMessage = self.response
         elif not validator.CaseIsJSON():
             errorMessage = "FAILURE: The response is not in json format. \n", self.response
+            isValidStructure = False
 
         ResultGenerator(
             nameReportFolder="reports/",
             nameReportFile=self.testCaseName,
             testSuiteName=self.testSuiteName,
-            testCaseName=self.testCaseName,
-            duration=self.duration,
+            testCaseName=self.testCaseName + " - validateJsonStructure",
+            duration=0.0,
             testResult=errorMessage
         )
-        return
+        return isValidStructure
 
     def CaseIsJSON(self):
         try:
@@ -129,13 +158,22 @@ class Validator:
             return None
         return True
 
+    def CaseGenReport(self):
+        # GEN. XML TEST report
+        ResultGenerator(
+            nameReportFolder="reports/",
+            nameReportFile=self.testCaseName,
+            testSuiteName=self.testSuiteName,
+            testCaseName=self.testCaseName,
+            duration="",
+            testResult="",
+            genXMLReport=True
+        )
 
 class ResultGenerator:
 
-    def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, duration, testResult, genXMLReport = False):
-        if genXMLReport:
-            self.genXmlReport(self.genReportFromFolder())
-            return
+    def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, duration, testResult,
+                 genXMLReport=False):
         self.parsedResult = None
         self.testSuiteName = testSuiteName
         self.testCaseName = testCaseName
@@ -143,14 +181,15 @@ class ResultGenerator:
         self.testResult = testResult
         self.nameReportFolder = nameReportFolder
         self.nameReportFile = nameReportFile
-        self.genTmpRepostFile()
+        if genXMLReport:
+            self.genXmlReport(self.genReportFromFolder())
+        else:
+            self.genTmpRepostFile()
 
     def removeLogFileThen(self, nameOfFile):
         now = datetime.now()
         parsedDateName = nameOfFile.replace('~' + self.nameReportFile.replace("/", "%") + '.log', '')
-        parsedDateName = parsedDateName.replace('reports/','')
-        print('Remove file: ', parsedDateName)
-
+        parsedDateName = parsedDateName.replace('reports/', '')
         if parsedDateName < now.strftime("%Y-%m-%d"):
             print('Remove file: ', nameOfFile)
             os.remove(nameOfFile)
@@ -159,13 +198,13 @@ class ResultGenerator:
         self.genFolder()
         file = open(
             self.nameReportFolder +
-            str(datetime.today().strftime("%Y-%m-%d")) +
+            str(datetime.now().strftime("%Y-%m-%d")) +
             '~'
             + self.nameReportFile.replace("/", "%") + '.log',
             "a"
         )
         file.write(
-            str(datetime.today().strftime("%Y-%m-%d_%H:%m:%S")) +
+            str(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")) +
             '~' + str(self.testSuiteName) +
             '~' + str(self.testCaseName) +
             '~' + str(self.duration) +
@@ -174,39 +213,47 @@ class ResultGenerator:
         file.close()
 
     def genReportFromFolder(self):
-        testSuite = []
         for file in os.listdir(self.nameReportFolder):
             if file.endswith(".log"):
                 self.removeLogFileThen(self.nameReportFolder + file)
-                testSuite.append(
-                    self.CreateTestSuite(file=file)
-                )
+                testSuite = self.CreateTestSuite(file=file)
         return testSuite
 
     def genXmlReport(self, TestSuiteData):
         with open(
-                self.nameReportFolder + self.nameReportFile + "-" + str(datetime.today().strftime("%Y-%m-%d")) + ".xml",
+                self.nameReportFolder + self.nameReportFile + "-" + str(datetime.now().strftime("%Y-%m-%d")) + ".xml",
                 'w') as file:
             TestSuite.to_file(file_descriptor=file, test_suites=TestSuiteData, prettyprint=True)
 
     def CreateTestSuite(self, file):
-        return TestSuite(name=self.testSuiteName,
-                         test_cases=self.CreateTestCases(file),
-                         timestamp=str(datetime.today().strftime("%Y-%m-%d"))
-                         )
-
-    def CreateTestCases(self, file):
+        testSuites = []
         testCases = []
         with open(self.nameReportFolder.replace("/", "") + '/' + file, 'r') as f:
             dataFileContent = f.read()
             linesFileContent = dataFileContent.splitlines()
-            for lineFileContent in linesFileContent:
-                testCases.append(
-                    self.createTestCase(parsedResult=lineFileContent.split('~'))
-                )
-        return testCases
+            previousValueTime = ""
+            for index, lineFileContent in enumerate(linesFileContent, start=0):
+                splitLine = lineFileContent.split('~')
+                if (index > 0) & (previousValueTime != str(splitLine[0])):
+                    testSuites.append(
+                        TestSuite(name=self.testSuiteName,
+                                  test_cases=testCases,
+                                  timestamp=str(splitLine[0])
+                                  )
+                    )
+                    testCases = []
+                testCases.append(self.CreateTestCase(splitLine))
+                if len(testSuites) == 0:
+                    testSuites.append(
+                        TestSuite(name=self.testSuiteName,
+                                  test_cases=testCases,
+                                  timestamp=str(splitLine[0])
+                                  )
+                    )
+                previousValueTime = splitLine[0]
+        return testSuites
 
-    def createTestCase(self, parsedResult, testCases=None):
+    def CreateTestCase(self, parsedResult):
         testCase = TestCase(
             name=parsedResult[2],
             elapsed_sec=float(parsedResult[3])
@@ -247,12 +294,12 @@ if __name__ == "__main__":
                         help="TimeoutForAction delay for provide data for text detection on web site.",
                         type=int
                         )
-    parser.add_argument('--ExpectedValues', required=False,
+    parser.add_argument('--ExpectedValues', required=True,
                         help="ResponseValidator expected response.",
                         type=str
                         )
-    parser.add_argument('--ResponseFormat', required=False,
-                        help="ResponseFormat which type of response should be expected. types: (Text, Number, Json, Array, JsonStructure)",
+    parser.add_argument('--ResponseFormat', required=True,
+                        help="ResponseFormat which type of response should be expected. types: (Text, Number, Json, Array, JsonStructure, CheckValueInstructure)",
                         type=str
                         )
     parser.add_argument('--ApiNameTestSuite', required=True,
@@ -264,9 +311,8 @@ if __name__ == "__main__":
                         type=str
                         )
 
-
     args = parser.parse_args()
-    if args.MethodType == 'POST' and Validator(response=args.RequestData, responseFormat="caseIsJSON") is False:
+    if args.MethodType == 'POST' and Validator(response=args.RequestData).CaseIsJSON() is False:
         print(args)
         print("It is necessary set the parameter 'RequestData' for POST method on valid escape json: \n",
               args.RequestData

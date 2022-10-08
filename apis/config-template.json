@@ -1,24 +1,61 @@
 [
-  "request": {
-      "method": "GET",
-      "url": "http://localhost:12000/get?test=test",
-      "responseStatus": 200
-    },
   {
+    "request": {
+      "method": "POST",
+      "url": "http://localhost:12000/get?test=test",
+      "RequestData": "{\"key\": \"value\",}",
+      "responseStatus": 200,
+      "nameSuite": "/get",
+      "timeoutForAction": 10
+    },
     "data": [
       {
         "key": "",
         "valueType": "text",
         "value": "Test"
-      }, {
-        "key" : "",
+      },
+      {
+        "key": "",
         "valueType": "number",
         "value": 0
-      },{
+      },
+      {
         "key": "",
         "valueType": "array",
         "value": "[\"item\"]"
-      },{
+      },
+      {
+        "key": "",
+        "valueType": "list",
+        "value": "{\"key\": \"value\"}"
+      }
+    ]
+  },
+  {
+    "request": {
+      "method": "GET",
+      "url": "http://localhost:12000/get?test=test",
+      "responseStatus": 200,
+      "nameSuite": "/get",
+      "timeoutForAction": 10
+    },
+    "data": [
+      {
+        "key": "",
+        "valueType": "text",
+        "value": "Test"
+      },
+      {
+        "key": "",
+        "valueType": "number",
+        "value": 0
+      },
+      {
+        "key": "",
+        "valueType": "array",
+        "value": "[\"item\"]"
+      },
+      {
         "key": "",
         "valueType": "list",
         "value": "{\"key\": \"value\"}"
