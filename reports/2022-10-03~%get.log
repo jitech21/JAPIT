@@ -1,0 +1,71 @@
+2022-10-03 20:30:56.834475~/get~/get~0.031491994857788086~
+2022-10-03 20:31:15.520394~/get~/get~0.026762008666992188~
+2022-10-03 20:31:16.876974~/get~/get~0.03243899345397949~
+2022-10-03 20:31:17.828336~/get~/get~0.02505803108215332~
+2022-10-03 20:31:18.748817~/get~/get~0.025656700134277344~
+2022-10-03 20:49:07.251233~/get~/get~0.03326678276062012~
+2022-10-03 20:50:12.879807~/get~/get~0.04039907455444336~
+2022-10-03 20:50:56.915949~/get~/get~0.03754115104675293~
+2022-10-03 20:51:00.053339~/get~/get~0.03439021110534668~
+2022-10-03 20:53:00.736826~/get~/get~0.025594234466552734~
+2022-10-03 20:58:17.956222~/get~/get~0.02905869483947754~('The response is not in json format. \n', '{{\n  "args": {\n    "test": "test"\n  }, \n  "headers": {\n    "Accept": "*/*", \n    "Accept-Encoding": "gzip, deflate", \n    "Connection": "keep-alive", \n    "Host": "localhost:12000", \n    "User-Agent": "python-requests/2.28.1"\n  }, \n  "origin": "172.17.0.1", \n  "url": "http://localhost:12000/get?test=test"\n}\n')
+2022-10-03 20:58:58.788579~/get~/get~0.030703306198120117~
+2022-10-03 21:00:55.805314~/get~/get~0.03080606460571289~
+2022-10-03 21:01:06.677017~/get~/get~0.02914571762084961~
+2022-10-03 21:01:34.474081~/get~/get~0.03364109992980957~
+2022-10-03 21:03:23.846562~/get~/get~0.029826879501342773~
+2022-10-03 21:04:41.043536~/get~/get~0.0343470573425293~
+2022-10-03 21:05:02.464790~/get~/get~0.033370018005371094~
+2022-10-03 21:05:14.703790~/get~/get~0.03246617317199707~
+2022-10-03 21:05:44.039351~/get~/get~0.02630615234375~
+2022-10-03 21:06:09.942184~/get~/get~0.02996206283569336~
+2022-10-03 21:07:16.401906~/get~/get~0.02288508415222168~
+2022-10-03 21:08:37.241052~/get~/get~0.02498912811279297~
+2022-10-03 21:09:31.989295~/get~/get~0.0346989631652832~
+2022-10-03 21:10:41.747227~/get~/get~0.031529903411865234~
+2022-10-03 21:10:54.473939~/get~/get~0.024826765060424805~
+2022-10-03 21:11:49.259069~/get~/get~0.02827596664428711~
+2022-10-03 21:14:41.766885~/get~/get~0.0556790828704834~
+2022-10-03 21:15:29.554477~/get~/get~0.03290700912475586~
+2022-10-03 21:16:06.337678~/get~/get~0.031491994857788086~
+2022-10-03 21:16:21.784361~/get~/get~0.03004908561706543~
+2022-10-03 21:17:49.182298~/get~/get~0.02911829948425293~
+2022-10-03 21:19:06.009214~/get~/get~0.030585050582885742~
+2022-10-03 21:26:29.679747~/get~/get~0.026578903198242188~
+2022-10-03 21:26:52.935889~/get~/get~0.030545949935913086~
+2022-10-03~/get~/get~0.029679059982299805~
+2022-10-03~/get~/get~0.030777692794799805~
+2022-10-03~/get~/get~0.032369136810302734~
+2022-10-03~/get~/get~0.025661945343017578~
+2022-10-03~/get~/get~0.02984309196472168~
+2022-10-03~/get~/get~0.05837583541870117~('The response is not in json format. \n', 'ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404')
+2022-10-03~/get~/get~0.021587848663330078~
+2022-10-03~/get~/get~0.02802133560180664~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.021571874618530273~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.03127884864807129~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.02701711654663086~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.028599023818969727~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.02894902229309082~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.036337852478027344~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.026316165924072266~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.02280402183532715~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.02558279037475586~ERROR: API address:  returned this response status_code: 404
+2022-10-03~/get~/get~0.024200916290283203~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.02513599395751953~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.04042792320251465~
+2022-10-03~/get~/get~0.027088165283203125~
+2022-10-03~/get~/get~0.029285192489624023~
+2022-10-03~/get~/get~0.03061079978942871~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.027077198028564453~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.025419235229492188~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.02906179428100586~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.030195236206054688~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.04237985610961914~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.024795055389404297~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.033685922622680664~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03~/get~/get~0.028542041778564453~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03_22:10:52~/get~/get~0.0325009822845459~ERROR: API address: http://localhost:12000/getTEST?test=test returned this response status_code: 404
+2022-10-03_22:10:28~/get~/get~0.03812408447265625~('The response is not in json format. \n', '{\n  "args": {\n    "test": "test"\n  }, \n  "headers": {\n    "Accept": "*/*", \n    "Accept-Encoding": "gzip, deflate", \n    "Connection": "keep-alive", \n    "Host": "localhost:12000", \n    "User-Agent": "python-requests/2.28.1"\n  }, \n  "origin": "172.17.0.1", \n  "url": "http://localhost:12000/get?test=test"\n}\n')
+2022-10-03_22:10:41~/get~/get~0.02611374855041504~('The response is not in json format. \n', '{\n  "args": {\n    "test": "test"\n  }, \n  "headers": {\n    "Accept": "*/*", \n    "Accept-Encoding": "gzip, deflate", \n    "Connection": "keep-alive", \n    "Host": "localhost:12000", \n    "User-Agent": "python-requests/2.28.1"\n  }, \n  "origin": "172.17.0.1", \n  "url": "http://localhost:12000/get?test=test"\n}\n')
+2022-10-03_22:10:04~/get~/get~0.02829599380493164~('The response is not in json format. \n', '{\n  "args": {\n    "test": "test"\n  }, \n  "headers": {\n    "Accept": "*/*", \n    "Accept-Encoding": "gzip, deflate", \n    "Connection": "keep-alive", \n    "Host": "localhost:12000", \n    "User-Agent": "python-requests/2.28.1"\n  }, \n  "origin": "172.17.0.1", \n  "url": "http://localhost:12000/get?test=test"\n}\n')
+2022-10-03_22:10:20~/get~/get~0.03411102294921875~
