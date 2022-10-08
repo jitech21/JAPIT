@@ -83,6 +83,7 @@ class Validator:
         if len(responseValidationRules) == 1:
             getattr(self, 'Case' + responseValidationRules[0])()
         else:
+            getattr(self, 'CaseResponse')()
             for validationRules in responseValidationRules:
                 getattr(self, 'Case' + validationRules)()
 
@@ -96,7 +97,7 @@ class Validator:
         # >> array
         # >> list
 
-    def CaseJson(self):
+    def CaseResponse(self):
         ResultGenerator(
             nameReportFolder="reports/",
             nameReportFile=self.testCaseName,
@@ -105,10 +106,6 @@ class Validator:
             duration=self.duration,
             testResult=""
         )
-        if self.CaseJsonStructure():
-            self.CaseCheckValueInstructure()
-        else:
-            print("The validation is skipping because structure is not valid")
 
     def CaseText(self):
         # TODO: TBD
@@ -130,7 +127,7 @@ class Validator:
         # TODO: TBD
         print("2")
 
-    def CaseJsonStructure(self):
+    def CaseJson(self):
         errorMessage = ""
         validator = Validator(response=self.response, responseFormat="IsJSON")
         isValidStructure = True
