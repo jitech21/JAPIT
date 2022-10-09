@@ -34,6 +34,31 @@ except ImportError:
     raise Exception('Module install via: pip install junitparser')
 
 
+def GenFolder(nameReportFolder):
+    if not os.path.exists(nameReportFolder):
+        os.mkdir(nameReportFolder)
+        print("Directory ", nameReportFolder, " Created ")
+    return nameReportFolder
+
+
+def WriteOpenData(fileName, folderName, writeData, openType="w"):
+    # TODO implement open as function not create response data if exist
+    file = open(
+        folderName + "/" + fileName,
+        openType
+    )
+    if (openType == 'w') | (openType == 'a'):
+        file.write(
+            writeData
+        )
+    file.close()
+    return file
+
+
+def loadContent(nameReportFolder, file):
+    return open(nameReportFolder + file, 'r')
+
+
 def Request(urlApi, jsonReq, responseNumber, timeoutForAction, methodType):
     try:
         if methodType == "POST":
@@ -84,6 +109,7 @@ class Validator:
             getattr(self, 'Case' + responseValidationRules[0])()
         else:
             getattr(self, 'CaseResponse')()
+            getattr(self, 'CasePrevoiusDataValidation')()
             for validationRules in responseValidationRules:
                 getattr(self, 'Case' + validationRules)()
 
@@ -107,6 +133,33 @@ class Validator:
             testResult=""
         )
 
+    def CaseCreateResponseFileOutput(self):
+        createNewFile = self.testSuiteName.replace("/", "%")
+        folderName = "apis/" + createNewFile + "/response"
+        WriteOpenData(fileName=createNewFile + '.json', folderName=folderName, writeData=self.response, openType="w")
+
+    def CasePrevoiusDataValidation(self):
+        createNewFile = self.testSuiteName.replace("/", "%")
+        folderName = "apis/" + createNewFile + "/response/"
+        if os.path.exists(folderName + createNewFile + ".json"):
+            fileLoad = loadContent(nameReportFolder=folderName, file=createNewFile + ".json")
+            expectedData = fileLoad.read()
+            if self.response == expectedData:
+                errorMessage = ''
+            else:
+                errorMessage = "FAILURE: The response is not same as expected:", self.response
+            ResultGenerator(
+                nameReportFolder="reports/",
+                nameReportFile=self.testCaseName,
+                testSuiteName=self.testSuiteName,
+                testCaseName=self.testCaseName + " - validateExpectedData",
+                duration=0.0,
+                testResult=errorMessage
+            )
+            print(8)
+        else:
+            self.CaseCreateResponseFileOutput()
+
     def CaseText(self):
         # TODO: TBD
         print("2")
@@ -125,7 +178,7 @@ class Validator:
 
     def CaseCheckValueInstructure(self):
         # TODO: TBD
-        print("2")
+        print("10")
 
     def CaseJson(self):
         errorMessage = ""
@@ -134,7 +187,7 @@ class Validator:
         if self.response.startswith("ERROR:"):
             errorMessage = self.response
         elif not validator.CaseIsJSON():
-            errorMessage = "FAILURE: The response is not in json format. \n", self.response
+            errorMessage = "FAILURE: The response is not in json format:", self.response
             isValidStructure = False
 
         ResultGenerator(
@@ -167,6 +220,7 @@ class Validator:
             genXMLReport=True
         )
 
+
 class ResultGenerator:
 
     def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, duration, testResult,
@@ -192,22 +246,11 @@ class ResultGenerator:
             os.remove(nameOfFile)
 
     def genTmpRepostFile(self):
-        self.genFolder()
-        file = open(
-            self.nameReportFolder +
-            str(datetime.now().strftime("%Y-%m-%d")) +
-            '~'
-            + self.nameReportFile.replace("/", "%") + '.log',
-            "a"
-        )
-        file.write(
-            str(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")) +
-            '~' + str(self.testSuiteName) +
-            '~' + str(self.testCaseName) +
-            '~' + str(self.duration) +
-            '~' + str(self.testResult) + '\n'
-        )
-        file.close()
+        GenFolder(self.nameReportFolder)
+        fileName = str(datetime.now().strftime("%Y-%m-%d")) + '~' + self.nameReportFile.replace("/", "%") + '.log'
+        data = str(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")) + '~' + str(self.testSuiteName) + '~' + str(
+            self.testCaseName) + '~' + str(self.duration) + '~' + str(self.testResult) + '\n'
+        WriteOpenData(fileName=fileName, folderName=self.nameReportFolder, writeData=data, openType='a')
 
     def genReportFromFolder(self):
         for file in os.listdir(self.nameReportFolder):
@@ -225,13 +268,20 @@ class ResultGenerator:
     def CreateTestSuite(self, file):
         testSuites = []
         testCases = []
-        with open(self.nameReportFolder.replace("/", "") + '/' + file, 'r') as f:
+        with loadContent(self.nameReportFolder.replace("/", "") + '/', file) as f:
             dataFileContent = f.read()
             linesFileContent = dataFileContent.splitlines()
             previousValueTime = ""
             for index, lineFileContent in enumerate(linesFileContent, start=0):
                 splitLine = lineFileContent.split('~')
-                if (index > 0) & (previousValueTime != str(splitLine[0])):
+                if (len(testSuites) == 0) & (len(testCases) > 0):
+                    testSuites.append(
+                        TestSuite(name=self.testSuiteName,
+                                  test_cases=testCases,
+                                  timestamp=str(splitLine[0])
+                                  )
+                    )
+                elif (index > 0) & (previousValueTime != str(splitLine[0])) :
                     testSuites.append(
                         TestSuite(name=self.testSuiteName,
                                   test_cases=testCases,
@@ -239,14 +289,9 @@ class ResultGenerator:
                                   )
                     )
                     testCases = []
-                testCases.append(self.CreateTestCase(splitLine))
-                if len(testSuites) == 0:
-                    testSuites.append(
-                        TestSuite(name=self.testSuiteName,
-                                  test_cases=testCases,
-                                  timestamp=str(splitLine[0])
-                                  )
-                    )
+                testCase = self.CreateTestCase(splitLine)
+                testCases.append(testCase)
+
                 previousValueTime = splitLine[0]
         return testSuites
 
@@ -256,19 +301,14 @@ class ResultGenerator:
             elapsed_sec=float(parsedResult[3])
         )
         result = parsedResult[4]
-        if result.startswith('ERROR:'):
+        if 'ERROR:' in result:
             testCase.add_error_info(message=result, output=result)
-        elif result.startswith('DISABLED:'):
+        elif 'DISABLED:' in result:
             testCase.add_skipped_info(message=result, output=result)
-        elif result.startswith('FAILURE:'):
+        elif 'FAILURE:' in result:
+            # TODO: confirm change status in test case fail -> pass, pass-> fail
             testCase.add_failure_info(message=result, output=result)
         return testCase
-
-    def genFolder(self):
-        if not os.path.exists(self.nameReportFolder):
-            os.mkdir(self.nameReportFolder)
-            print("Directory ", self.nameReportFolder, " Created ")
-        return
 
 
 if __name__ == "__main__":
