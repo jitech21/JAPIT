@@ -1,7 +1,7 @@
 '''
 API testing tool
 '''
-
+# TODO: generator request from swagger json file
 # TODO: retest all type of requests
 # TODO: validation of reponse
 ## TODO: validate keys
@@ -19,7 +19,9 @@ try:
     import os
     import json
     from sys import exit
+    from datetime import timedelta
     from datetime import datetime
+
 except ImportError:
     raise Exception('Module install via: pip install requests')
 
@@ -156,7 +158,6 @@ class Validator:
                 duration=0.0,
                 testResult=errorMessage
             )
-            print(8)
         else:
             self.CaseCreateResponseFileOutput()
 
@@ -274,24 +275,19 @@ class ResultGenerator:
             previousValueTime = ""
             for index, lineFileContent in enumerate(linesFileContent, start=0):
                 splitLine = lineFileContent.split('~')
-                if (len(testSuites) == 0) & (len(testCases) > 0):
+
+                if index == 0:
+                    previousValueTime = str(splitLine[0])
+                if previousValueTime != str(splitLine[0]):
                     testSuites.append(
                         TestSuite(name=self.testSuiteName,
                                   test_cases=testCases,
-                                  timestamp=str(splitLine[0])
-                                  )
-                    )
-                elif (index > 0) & (previousValueTime != str(splitLine[0])) :
-                    testSuites.append(
-                        TestSuite(name=self.testSuiteName,
-                                  test_cases=testCases,
-                                  timestamp=str(splitLine[0])
+                                  timestamp=previousValueTime
                                   )
                     )
                     testCases = []
                 testCase = self.CreateTestCase(splitLine)
                 testCases.append(testCase)
-
                 previousValueTime = splitLine[0]
         return testSuites
 
@@ -306,7 +302,6 @@ class ResultGenerator:
         elif 'DISABLED:' in result:
             testCase.add_skipped_info(message=result, output=result)
         elif 'FAILURE:' in result:
-            # TODO: confirm change status in test case fail -> pass, pass-> fail
             testCase.add_failure_info(message=result, output=result)
         return testCase
 
