@@ -35,11 +35,6 @@ try:
 except ImportError:
     raise Exception('Module install via: pip install junit-xml')
 
-try:
-    from junitparser import JUnitXml
-except ImportError:
-    raise Exception('Module install via: pip install junitparser')
-
 
 ## Load Json config file content
 def LoadTestData(args):
