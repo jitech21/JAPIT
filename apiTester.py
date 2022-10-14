@@ -1,16 +1,21 @@
 '''
 API testing tool
 '''
-# TODO: generator request from swagger json file
+
 # TODO: retest all type of requests
-# TODO: validation of reponse
-## TODO: validate keys
-## TODO: validate type of value in define keys
-# TODO: authentication via OATH2.0 integration with
 # TODO: keycloack one url and another url and then session number
-# TODO: ADD commant
-# TODO: Create documantion on my own Web site
+# TODO: Create documentation on my own Web site
 # TODO. graph around dependency and visual view what working on
+# TODO: test result: test suite
+# > testcase data come
+# > testcase validate structure
+# >> text
+# >> number
+# >> array
+# >> list
+# >> max , min, mimeType, of number
+# required keys in response
+# TODO: generator request from swagger json file
 
 try:
     import requests
@@ -36,6 +41,15 @@ except ImportError:
     raise Exception('Module install via: pip install junitparser')
 
 
+## Load Json config file content
+def LoadTestData(args):
+    if args.ConfFile is not None:
+        loadData = LoadContent(nameReportFolder="", file=args.ConfFile)
+        ConfigFile = json.load(loadData)
+        return ConfigFile
+
+
+## Create folder if not exist
 def GenFolder(nameReportFolder):
     if not os.path.exists(nameReportFolder):
         os.mkdir(nameReportFolder)
@@ -43,6 +57,7 @@ def GenFolder(nameReportFolder):
     return nameReportFolder
 
 
+## Write tmp log data file
 def WriteOpenData(fileName, folderName, writeData, openType="w"):
     # TODO implement open as function not create response data if exist
     file = open(
@@ -57,10 +72,12 @@ def WriteOpenData(fileName, folderName, writeData, openType="w"):
     return file
 
 
-def loadContent(nameReportFolder, file):
+## Loading content from the file
+def LoadContent(nameReportFolder, file):
     return open(nameReportFolder + file, 'r')
 
 
+## This action perform communication via requests
 def Request(urlApi, jsonReq, responseNumber, timeoutForAction, methodType):
     try:
         if methodType == "POST":
@@ -76,12 +93,13 @@ def Request(urlApi, jsonReq, responseNumber, timeoutForAction, methodType):
             return f"ERROR: API address: {str(urlApi)} returned this response status_code: {str(response.status_code)}"
 
 
-def ApiTester(urlApi, methodType, jsonReq, responseNumber, timeoutForAction, responseFormat, expectedValues,
+## base entry method to API testing
+def ApiTester(endPoint, methodType, jsonReq, responseNumber, timeoutForAction, responseValidations,
               apiNameTestCase="", apiNameTestSuite=""):
     responseData = ""
     startTime = time.time()
     responseData = Request(
-        urlApi=urlApi,
+        urlApi=endPoint,
         jsonReq=jsonReq,
         responseNumber=responseNumber,
         timeoutForAction=timeoutForAction,
@@ -91,18 +109,17 @@ def ApiTester(urlApi, methodType, jsonReq, responseNumber, timeoutForAction, res
     runtime = time.time() - startTime
     Validator(
         response=responseData,
-        responseFormat=responseFormat,
-        expectedValues=expectedValues,
+        responseFormat=responseValidations,
         duration=runtime,
         testSuiteName=apiNameTestSuite,
         testCaseName=apiNameTestCase
     )
 
 
+### Class validate response
 class Validator:
-    def __init__(self, response, responseFormat="", expectedValues="", duration=0.0, testSuiteName="", testCaseName=""):
+    def __init__(self, response, responseFormat="", duration=0.0, testSuiteName="", testCaseName=""):
         self.response = response
-        self.expectedValues = expectedValues
         self.duration = duration
         self.testCaseName = testCaseName
         self.testSuiteName = testSuiteName
@@ -115,16 +132,7 @@ class Validator:
             for validationRules in responseValidationRules:
                 getattr(self, 'Case' + validationRules)()
 
-        # TODO: implement config file in apis
-        # TODO: many validation rules
-        # TODO: test result: test suite
-        # > testcase data come
-        # > testcase validate structure
-        # >> text
-        # >> number
-        # >> array
-        # >> list
-
+    ## Validator if response come
     def CaseResponse(self):
         ResultGenerator(
             nameReportFolder="reports/",
@@ -135,16 +143,18 @@ class Validator:
             testResult=""
         )
 
+    ## Create expected data validation file if not exist
     def CaseCreateResponseFileOutput(self):
         createNewFile = self.testSuiteName.replace("/", "%")
         folderName = "apis/" + createNewFile + "/response"
         WriteOpenData(fileName=createNewFile + '.json', folderName=folderName, writeData=self.response, openType="w")
 
+    ## Validator if data should be same
     def CasePrevoiusDataValidation(self):
         createNewFile = self.testSuiteName.replace("/", "%")
         folderName = "apis/" + createNewFile + "/response/"
         if os.path.exists(folderName + createNewFile + ".json"):
-            fileLoad = loadContent(nameReportFolder=folderName, file=createNewFile + ".json")
+            fileLoad = LoadContent(nameReportFolder=folderName, file=createNewFile + ".json")
             expectedData = fileLoad.read()
             if self.response == expectedData:
                 errorMessage = ''
@@ -161,26 +171,27 @@ class Validator:
         else:
             self.CaseCreateResponseFileOutput()
 
+    ## validate text
     def CaseText(self):
         # TODO: TBD
         print("2")
 
+    ## validate number
     def CaseNumber(self):
         # TODO: TBD
         print("3")
 
+    ##  validate array
     def CaseArray(self):
         # TODO: TBD
         print("4")
 
-    def CaseList(self):
-        # TODO: TBD
-        print("5")
-
-    def CaseCheckValueInstructure(self):
+    ## validate data in structure
+    def CaseCheckValueInStructure(self):
         # TODO: TBD
         print("10")
 
+    ## validate json response
     def CaseJson(self):
         errorMessage = ""
         validator = Validator(response=self.response, responseFormat="IsJSON")
@@ -201,6 +212,7 @@ class Validator:
         )
         return isValidStructure
 
+    ## validate parsable JSON
     def CaseIsJSON(self):
         try:
             json.loads(self.response)
@@ -209,6 +221,7 @@ class Validator:
             return None
         return True
 
+    ## createReport
     def CaseGenReport(self):
         # GEN. XML TEST report
         ResultGenerator(
@@ -222,6 +235,7 @@ class Validator:
         )
 
 
+## junit XML report
 class ResultGenerator:
 
     def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, duration, testResult,
@@ -238,6 +252,7 @@ class ResultGenerator:
         else:
             self.genTmpRepostFile()
 
+    ## Remove unused file
     def removeLogFileThen(self, nameOfFile):
         now = datetime.now()
         parsedDateName = nameOfFile.replace('~' + self.nameReportFile.replace("/", "%") + '.log', '')
@@ -246,6 +261,7 @@ class ResultGenerator:
             print('Remove file: ', nameOfFile)
             os.remove(nameOfFile)
 
+    ## Request for generate tmp file
     def genTmpRepostFile(self):
         GenFolder(self.nameReportFolder)
         fileName = str(datetime.now().strftime("%Y-%m-%d")) + '~' + self.nameReportFile.replace("/", "%") + '.log'
@@ -253,6 +269,7 @@ class ResultGenerator:
             self.testCaseName) + '~' + str(self.duration) + '~' + str(self.testResult) + '\n'
         WriteOpenData(fileName=fileName, folderName=self.nameReportFolder, writeData=data, openType='a')
 
+    # Load tmp report file from report folder
     def genReportFromFolder(self):
         for file in os.listdir(self.nameReportFolder):
             if file.endswith(".log"):
@@ -260,16 +277,18 @@ class ResultGenerator:
                 testSuite = self.CreateTestSuite(file=file)
         return testSuite
 
+    ## generate junit xml report file
     def genXmlReport(self, TestSuiteData):
         with open(
                 self.nameReportFolder + self.nameReportFile + "-" + str(datetime.now().strftime("%Y-%m-%d")) + ".xml",
                 'w') as file:
             TestSuite.to_file(file_descriptor=file, test_suites=TestSuiteData, prettyprint=True)
 
+    ## create test suite in junit xml structure
     def CreateTestSuite(self, file):
         testSuites = []
         testCases = []
-        with loadContent(self.nameReportFolder.replace("/", "") + '/', file) as f:
+        with LoadContent(self.nameReportFolder.replace("/", "") + '/', file) as f:
             dataFileContent = f.read()
             linesFileContent = dataFileContent.splitlines()
             previousValueTime = ""
@@ -291,6 +310,7 @@ class ResultGenerator:
                 previousValueTime = splitLine[0]
         return testSuites
 
+    ## create test case in junit xml structure
     def CreateTestCase(self, parsedResult):
         testCase = TestCase(
             name=parsedResult[2],
@@ -308,57 +328,28 @@ class ResultGenerator:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--UrlApi", required=True, help="WebSite specify which web site tested.",
-                        type=str
-                        )
-    parser.add_argument("--MethodType", required=False, help="Select with method should used (POST,GET)",
-                        type=str
-                        )
-    parser.add_argument('--RequestData', required=False,
-                        help="RequestedData for POST action.",
-                        type=str
-                        )
-    parser.add_argument('--ResponseNumber', required=True,
-                        help="ResponseNumber which number shlould expect for passing test (for ex. 200).",
-                        type=int
-                        )
-    parser.add_argument('--TimeoutForAction', required=True,
-                        help="TimeoutForAction delay for provide data for text detection on web site.",
-                        type=int
-                        )
-    parser.add_argument('--ExpectedValues', required=True,
-                        help="ResponseValidator expected response.",
-                        type=str
-                        )
-    parser.add_argument('--ResponseFormat', required=True,
-                        help="ResponseFormat which type of response should be expected. types: (Text, Number, Json, Array, JsonStructure, CheckValueInstructure)",
-                        type=str
-                        )
-    parser.add_argument('--ApiNameTestSuite', required=True,
-                        help="ApiNameTestSuite name of test case",
-                        type=str
-                        )
-    parser.add_argument('--ApiNameTestCase', required=True,
-                        help="ApiNameTestCase name of test case",
-                        type=str
-                        )
+    parser.add_argument('--ConfFile', required=False, help="This file contains all previous parameters for test",
+                        type=str)
 
     args = parser.parse_args()
-    if args.MethodType == 'POST' and Validator(response=args.RequestData).CaseIsJSON() is False:
-        print(args)
-        print("It is necessary set the parameter 'RequestData' for POST method on valid escape json: \n",
-              args.RequestData
-              )
-        exit(1)
+    ## Load data from config file
+    loadedData = LoadTestData(args)
 
-    ApiTester(
-        urlApi=args.UrlApi,
-        methodType=args.MethodType,
-        jsonReq=args.RequestData,
-        responseNumber=args.ResponseNumber,
-        timeoutForAction=args.TimeoutForAction,
-        responseFormat=args.ResponseFormat,
-        expectedValues=args.ExpectedValues,
-        apiNameTestCase=str(args.ApiNameTestCase) if args.ApiNameTestCase != "" else args.UrlApi,
-        apiNameTestSuite=str(args.ApiNameTestSuite) if args.ApiNameTestSuite != "" else args.UrlApi
-    )
+    for index, config in enumerate(loadedData, start=0):
+        if config['request']['method'] == 'POST' and Validator(
+                response=config['request']['requestData']).CaseIsJSON() is False:
+            print(args)
+            print("It is necessary set the parameter 'RequestData' for POST method on valid escape json: \n",
+                  args.RequestData
+                  )
+            exit(1)
+        ApiTester(
+            endPoint=config['request']['endPoint'],
+            methodType=config['request']['method'],
+            jsonReq=config['request']['requestData'],
+            responseNumber=config['request']['responseStatus'],
+            timeoutForAction=config['request']['timeoutForActionSec'],
+            responseValidations=config['request']['validationRules'],
+            apiNameTestCase=config['request']['nameTestCase'],
+            apiNameTestSuite=config['request']['nameTestSuite']
+        )

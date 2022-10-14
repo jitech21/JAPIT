@@ -1,0 +1,14 @@
+[
+  {
+    "request": {
+      "method": "GET",
+      "endPoint": "http://localhost:12000/get?test=test",
+      "requestData": "",
+      "responseStatus": 200,
+      "nameTestSuite": "/get",
+      "nameTestCase": "/get",
+      "timeoutForActionSec": 10,
+      "validationRules": "Json~GenReport"
+    }
+  }
+]
