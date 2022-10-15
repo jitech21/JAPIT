@@ -6,7 +6,6 @@ API testing tool
 # TODO: keycloack one url and another url and then session number
 # TODO: Create documentation on my own Web site
 # TODO. graph around dependency and visual view what working on
-# TODO: test result: test suite
 # > testcase data come
 # > testcase validate structure
 # >> text
@@ -78,33 +77,41 @@ def Request(urlApi, jsonReq, responseNumber, timeoutForAction, methodType):
         if methodType == "POST":
             response = requests.post(urlApi, json=jsonReq, timeout=timeoutForAction)
         else:
-            response = requests.get(urlApi, timeout=timeoutForAction)
+            response = requests.get(urlApi, params=jsonReq, timeout=timeoutForAction)
     except Exception as e:
-        return f"ERROR: NOT OK: {str(e)}"
+        return {
+            "text": "ERROR: NOT OK: " + str(e),
+            "status_code": ''
+        }
     else:
         if int(responseNumber) == response.status_code:
-            return response.text
+            return {
+                "text": response.text,
+                "status_code": response.status_code
+            }
         else:
-            return f"ERROR: API address: {str(urlApi)} returned this response status_code: {str(response.status_code)}"
+            return {
+                "text": "FAILURE: API endpoint: " + str(urlApi) + "returned this response status_code: " + str(response.status_code),
+                "status_code": response.status_code
+            }
 
 
 ## base entry method to API testing
-def ApiTester(endPoint, methodType, jsonReq, responseNumber, timeoutForAction, responseValidations,
+def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAction, responseValidations,
               apiNameTestCase="", apiNameTestSuite=""):
     responseData = ""
     startTime = time.time()
     responseData = Request(
         urlApi=endPoint,
-        jsonReq=jsonReq,
+        jsonReq=jsonReqParams,
         responseNumber=responseNumber,
         timeoutForAction=timeoutForAction,
         methodType=methodType
     )
-
     runtime = time.time() - startTime
     Validator(
         response=responseData,
-        responseFormat=responseValidations,
+        responseValidationRules=responseValidations,
         duration=runtime,
         testSuiteName=apiNameTestSuite,
         testCaseName=apiNameTestCase
@@ -113,58 +120,61 @@ def ApiTester(endPoint, methodType, jsonReq, responseNumber, timeoutForAction, r
 
 ### Class validate response
 class Validator:
-    def __init__(self, response, responseFormat="", duration=0.0, testSuiteName="", testCaseName=""):
+    def __init__(self, response, responseValidationRules="", duration=0.0, testSuiteName="", testCaseName=""):
         self.response = response
         self.duration = duration
         self.testCaseName = testCaseName
         self.testSuiteName = testSuiteName
-        responseValidationRules = responseFormat.split('~')
+        responseValidationRules = responseValidationRules.split('~')
         if len(responseValidationRules) == 1:
             getattr(self, 'Case' + responseValidationRules[0])()
         else:
-            getattr(self, 'CaseResponse')()
-            getattr(self, 'CasePrevoiusDataValidation')()
             for validationRules in responseValidationRules:
                 getattr(self, 'Case' + validationRules)()
 
     ## Validator if response come
-    def CaseResponse(self):
+    def CaseResponseStatus(self):
+        errorMessage = ''
+        if 'ERROR:' in self.response['text']:
+            errorMessage = self.response['text']
+        elif 'FAILURE:' in self.response['text']:
+            errorMessage = self.response['text']
         ResultGenerator(
             nameReportFolder="reports/",
             nameReportFile=self.testCaseName,
             testSuiteName=self.testSuiteName,
-            testCaseName=self.testCaseName + " - Response come",
+            testCaseName=self.testCaseName + " - Response come with status: " + str(self.response['status_code']),
             duration=self.duration,
-            testResult=""
+            testResult=errorMessage
         )
 
     ## Create expected data validation file if not exist
     def CaseCreateResponseFileOutput(self):
         createNewFile = self.testSuiteName.replace("/", "%")
         folderName = "apis/" + createNewFile + "/response"
-        WriteOpenData(fileName=createNewFile + '.json', folderName=folderName, writeData=self.response, openType="w")
+        WriteOpenData(fileName=createNewFile + '.json', folderName=folderName, writeData=self.response['text'],
+                      openType="w")
 
     ## Validator if data should be same
-    def CasePrevoiusDataValidation(self):
+    def CasePreviousDataValidation(self):
         createNewFile = self.testSuiteName.replace("/", "%")
         folderName = "apis/" + createNewFile + "/response/"
+        errorMessage = ''
         if os.path.exists(folderName + createNewFile + ".json"):
             fileLoad = LoadContent(nameReportFolder=folderName, file=createNewFile + ".json")
             expectedData = fileLoad.read()
-            if self.response == expectedData:
-                errorMessage = ''
-            else:
-                errorMessage = "FAILURE: The response is not same as expected:", self.response
-            ResultGenerator(
-                nameReportFolder="reports/",
-                nameReportFile=self.testCaseName,
-                testSuiteName=self.testSuiteName,
-                testCaseName=self.testCaseName + " - validateExpectedData",
-                duration=0.0,
-                testResult=errorMessage
-            )
+            if str(self.response['text']) != str(expectedData):
+                errorMessage = "FAILURE: The response is not same as expected."
         else:
             self.CaseCreateResponseFileOutput()
+        ResultGenerator(
+            nameReportFolder="reports/",
+            nameReportFile=self.testCaseName,
+            testSuiteName=self.testSuiteName,
+            testCaseName=self.testCaseName + " - validateExpectedData",
+            duration=0.0,
+            testResult=errorMessage
+        )
 
     ## validate text
     def CaseText(self):
@@ -187,16 +197,15 @@ class Validator:
         print("10")
 
     ## validate json response
-    def CaseJson(self):
+    def CaseParsableJson(self):
         errorMessage = ""
-        validator = Validator(response=self.response, responseFormat="IsJSON")
+        validator = Validator(response=self.response['text'], responseValidationRules="IsJSON")
         isValidStructure = True
-        if self.response.startswith("ERROR:"):
-            errorMessage = self.response
+        if 'ERROR:' in self.response['text']:
+            errorMessage = self.response['text']
         elif not validator.CaseIsJSON():
-            errorMessage = "FAILURE: The response is not in json format:", self.response
+            errorMessage = "FAILURE: The response is not in json format."
             isValidStructure = False
-
         ResultGenerator(
             nameReportFolder="reports/",
             nameReportFile=self.testCaseName,
@@ -259,9 +268,14 @@ class ResultGenerator:
     ## Request for generate tmp file
     def genTmpRepostFile(self):
         GenFolder(self.nameReportFolder)
+        errorMessage = ''
+        if 'ERROR:' in self.testResult:
+            errorMessage = self.testResult
+        elif 'FAILURE:' in self.testResult:
+            errorMessage = self.testResult
         fileName = str(datetime.now().strftime("%Y-%m-%d")) + '~' + self.nameReportFile.replace("/", "%") + '.log'
         data = str(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")) + '~' + str(self.testSuiteName) + '~' + str(
-            self.testCaseName) + '~' + str(self.duration) + '~' + str(self.testResult) + '\n'
+            self.testCaseName) + '~' + str(self.duration) + '~' + str(errorMessage) + '\n'
         WriteOpenData(fileName=fileName, folderName=self.nameReportFolder, writeData=data, openType='a')
 
     # Load tmp report file from report folder
@@ -300,8 +314,11 @@ class ResultGenerator:
                                   )
                     )
                     testCases = []
-                testCase = self.CreateTestCase(splitLine)
-                testCases.append(testCase)
+                    testCase = self.CreateTestCase(splitLine)
+                    testCases.append(testCase)
+                else:
+                    testCase = self.CreateTestCase(splitLine)
+                    testCases.append(testCase)
                 previousValueTime = splitLine[0]
         return testSuites
 
@@ -312,11 +329,11 @@ class ResultGenerator:
             elapsed_sec=float(parsedResult[3])
         )
         result = parsedResult[4]
-        if 'ERROR:' in result:
+        if result.startswith('ERROR:'):
             testCase.add_error_info(message=result, output=result)
-        elif 'DISABLED:' in result:
+        elif result.startswith('DISABLED:'):
             testCase.add_skipped_info(message=result, output=result)
-        elif 'FAILURE:' in result:
+        elif result.startswith('FAILURE:'):
             testCase.add_failure_info(message=result, output=result)
         return testCase
 
@@ -330,21 +347,15 @@ if __name__ == "__main__":
     ## Load data from config file
     loadedData = LoadTestData(args)
 
-    for index, config in enumerate(loadedData, start=0):
-        if config['request']['method'] == 'POST' and Validator(
-                response=config['request']['requestData']).CaseIsJSON() is False:
-            print(args)
-            print("It is necessary set the parameter 'RequestData' for POST method on valid escape json: \n",
-                  args.RequestData
-                  )
-            exit(1)
+    for config in loadedData:
+        requestDataParams = json.loads(config['request']['requestDataParams'])
         ApiTester(
             endPoint=config['request']['endPoint'],
             methodType=config['request']['method'],
-            jsonReq=config['request']['requestData'],
-            responseNumber=config['request']['responseStatus'],
-            timeoutForAction=config['request']['timeoutForActionSec'],
-            responseValidations=config['request']['validationRules'],
-            apiNameTestCase=config['request']['nameTestCase'],
-            apiNameTestSuite=config['request']['nameTestSuite']
+            jsonReqParams=requestDataParams,
+            responseNumber=config['response']['responseStatus'],
+            timeoutForAction=config['response']['timeoutForActionSec'],
+            responseValidations=config['response']['validationRules'],
+            apiNameTestCase=config['response']['nameTestCase'],
+            apiNameTestSuite=config['response']['nameTestSuite']
         )
