@@ -1,0 +1,44 @@
+  {
+    "url": "https://petstore.swagger.io",
+    "endPoints": [
+      {
+      "request": {
+        "method": "GET",
+        "endPoint": "/v2/pet/findByStatus",
+        "requestDataParams": "{\"status\":  \"pending\"}"
+      },
+      "response": {
+        "responseStatus": 200,
+        "nameTestSuite": "/v2/pet/findByStatusPending",
+        "timeoutForActionSec": 10,
+        "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "endPoint": "/v2/pet/findByStatus",
+        "requestDataParams": "{\"status\":  \"available\"}"
+      },
+      "response": {
+        "responseStatus": 200,
+        "nameTestSuite": "/v2/pet/findByStatusAvailable",
+        "timeoutForActionSec": 10,
+        "validationRules": "ResponseStatus~ParsableJson~GenReport"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "endPoint": "/v2/pet/findByStatus",
+        "requestDataParams": "{\"status\":  \"sold\"}"
+      },
+      "response": {
+        "responseStatus": 200,
+        "nameTestSuite": "/v2/pet/findByStatusSold",
+        "timeoutForActionSec": 10,
+        "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport"
+      }
+    }
+  ]
+}

@@ -91,14 +91,14 @@ def Request(urlApi, jsonReq, responseNumber, timeoutForAction, methodType):
             }
         else:
             return {
-                "text": "FAILURE: API endpoint: " + str(urlApi) + "returned this response status_code: " + str(response.status_code),
+                "text": "FAILURE: API endpoint: " + str(urlApi) + "returned this response status_code: " + str(
+                    response.status_code),
                 "status_code": response.status_code
             }
 
 
 ## base entry method to API testing
-def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAction, responseValidations,
-              apiNameTestCase="", apiNameTestSuite=""):
+def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAction, responseValidations, apiNameTestSuite=""):
     responseData = ""
     startTime = time.time()
     responseData = Request(
@@ -114,7 +114,7 @@ def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAct
         responseValidationRules=responseValidations,
         duration=runtime,
         testSuiteName=apiNameTestSuite,
-        testCaseName=apiNameTestCase
+        testCaseName=apiNameTestSuite
     )
 
 
@@ -150,26 +150,30 @@ class Validator:
 
     ## Create expected data validation file if not exist
     def CaseCreateResponseFileOutput(self):
-        createNewFile = self.testSuiteName.replace("/", "%")
-        folderName = "apis/" + createNewFile + "/response"
+        createNewFile = self.testSuiteName.replace("/", "-")
+        folderName = "apisResponse/" + createNewFile  # + "/response"
+        GenFolder(folderName)
         WriteOpenData(fileName=createNewFile + '.json', folderName=folderName, writeData=self.response['text'],
                       openType="w")
 
     ## Validator if data should be same
     def CasePreviousDataValidation(self):
-        createNewFile = self.testSuiteName.replace("/", "%")
-        folderName = "apis/" + createNewFile + "/response/"
+        createNewFile = self.testSuiteName.replace("/", "-")
+        folderName = 'apisResponse/' + createNewFile + "/"
         errorMessage = ''
-        if os.path.exists(folderName + createNewFile + ".json"):
+        expectedData = ''
+        if os.path.exists(folderName):
             fileLoad = LoadContent(nameReportFolder=folderName, file=createNewFile + ".json")
             expectedData = fileLoad.read()
-            if str(self.response['text']) != str(expectedData):
-                errorMessage = "FAILURE: The response is not same as expected."
         else:
             self.CaseCreateResponseFileOutput()
+        if str(self.response['text']) != str(expectedData):
+            errorMessage = "FAILURE: The response is not same as expected."
+        if expectedData == "":
+            errorMessage = "ERROR: Problem with loading file."
         ResultGenerator(
             nameReportFolder="reports/",
-            nameReportFile=self.testCaseName,
+            nameReportFile=createNewFile,
             testSuiteName=self.testSuiteName,
             testCaseName=self.testCaseName + " - validateExpectedData",
             duration=0.0,
@@ -250,7 +254,7 @@ class ResultGenerator:
         self.duration = duration
         self.testResult = testResult
         self.nameReportFolder = nameReportFolder
-        self.nameReportFile = nameReportFile
+        self.nameReportFile = ""
         if genXMLReport:
             self.genXmlReport(self.genReportFromFolder())
         else:
@@ -259,11 +263,13 @@ class ResultGenerator:
     ## Remove unused file
     def removeLogFileThen(self, nameOfFile):
         now = datetime.now()
-        parsedDateName = nameOfFile.replace('~' + self.nameReportFile.replace("/", "%") + '.log', '')
+        parsedDateName = nameOfFile.replace('.log', '')
         parsedDateName = parsedDateName.replace('reports/', '')
         if parsedDateName < now.strftime("%Y-%m-%d"):
-            print('Remove file: ', nameOfFile)
             os.remove(nameOfFile)
+            print('Remove file: ', nameOfFile)
+            return True
+        return False
 
     ## Request for generate tmp file
     def genTmpRepostFile(self):
@@ -273,7 +279,8 @@ class ResultGenerator:
             errorMessage = self.testResult
         elif 'FAILURE:' in self.testResult:
             errorMessage = self.testResult
-        fileName = str(datetime.now().strftime("%Y-%m-%d")) + '~' + self.nameReportFile.replace("/", "%") + '.log'
+        # name of temp file log _%H:%M
+        fileName = str(datetime.now().strftime("%Y-%m-%d")) + '.log'
         data = str(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")) + '~' + str(self.testSuiteName) + '~' + str(
             self.testCaseName) + '~' + str(self.duration) + '~' + str(errorMessage) + '\n'
         WriteOpenData(fileName=fileName, folderName=self.nameReportFolder, writeData=data, openType='a')
@@ -281,15 +288,18 @@ class ResultGenerator:
     # Load tmp report file from report folder
     def genReportFromFolder(self):
         for file in os.listdir(self.nameReportFolder):
+            self.nameReportFile = file.replace('.log', '.xml')
+            testSuite = []
             if file.endswith(".log"):
-                self.removeLogFileThen(self.nameReportFolder + file)
-                testSuite = self.CreateTestSuite(file=file)
-        return testSuite
+                if not self.removeLogFileThen(self.nameReportFolder + file):
+                    testSuite = self.CreateTestSuite(file=file)
+                return testSuite
 
     ## generate junit xml report file
     def genXmlReport(self, TestSuiteData):
+        filename = self.nameReportFile.replace("/", "-")
         with open(
-                self.nameReportFolder + self.nameReportFile + "-" + str(datetime.now().strftime("%Y-%m-%d")) + ".xml",
+                self.nameReportFolder + filename,
                 'w') as file:
             TestSuite.to_file(file_descriptor=file, test_suites=TestSuiteData, prettyprint=True)
 
@@ -297,29 +307,34 @@ class ResultGenerator:
     def CreateTestSuite(self, file):
         testSuites = []
         testCases = []
-        with LoadContent(self.nameReportFolder.replace("/", "") + '/', file) as f:
+        with LoadContent(self.nameReportFolder, file) as f:
             dataFileContent = f.read()
             linesFileContent = dataFileContent.splitlines()
+            previousValueNameSuite = ""
             previousValueTime = ""
             for index, lineFileContent in enumerate(linesFileContent, start=0):
                 splitLine = lineFileContent.split('~')
-
                 if index == 0:
                     previousValueTime = str(splitLine[0])
                 if previousValueTime != str(splitLine[0]):
                     testSuites.append(
-                        TestSuite(name=self.testSuiteName,
+                        TestSuite(name=previousValueNameSuite,
                                   test_cases=testCases,
                                   timestamp=previousValueTime
                                   )
                     )
                     testCases = []
-                    testCase = self.CreateTestCase(splitLine)
-                    testCases.append(testCase)
-                else:
-                    testCase = self.CreateTestCase(splitLine)
-                    testCases.append(testCase)
+                testCase = self.CreateTestCase(splitLine)
+                testCases.append(testCase)
+                testCase = []
                 previousValueTime = splitLine[0]
+                previousValueNameSuite = self.testSuiteName
+            testSuites.append(
+                TestSuite(name=self.testSuiteName,
+                          test_cases=testCases,
+                          timestamp=previousValueTime
+                          )
+            )
         return testSuites
 
     ## create test case in junit xml structure
@@ -340,22 +355,21 @@ class ResultGenerator:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ConfFile', required=False, help="This file contains all previous parameters for test",
+    parser.add_argument('--ConfFile', required=True, help="This file contains all previous parameters for test",
                         type=str)
 
     args = parser.parse_args()
     ## Load data from config file
     loadedData = LoadTestData(args)
 
-    for config in loadedData:
-        requestDataParams = json.loads(config['request']['requestDataParams'])
+    for config in loadedData['endPoints']:
         ApiTester(
-            endPoint=config['request']['endPoint'],
+            endPoint=loadedData['url'] + config['request']['endPoint'],
             methodType=config['request']['method'],
-            jsonReqParams=requestDataParams,
+            jsonReqParams=config['request']['requestDataParams'],
             responseNumber=config['response']['responseStatus'],
             timeoutForAction=config['response']['timeoutForActionSec'],
             responseValidations=config['response']['validationRules'],
-            apiNameTestCase=config['response']['nameTestCase'],
             apiNameTestSuite=config['response']['nameTestSuite']
         )
+        time.sleep(1)

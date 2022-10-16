@@ -1,0 +1,18 @@
+{
+  "url": "{http://localhost:12000}",
+  "endPoints": [
+      {
+        "request": {
+          "method": "",
+          "endPoint": "",
+          "requestDataParams": "{}"
+        },
+        "response": {
+          "responseStatus": {number},
+          "nameTestSuite": "NameOfSuite",
+          "timeoutForActionSec": {number},
+          "validationRules": "{ResponseStatus~PreviousDataValidation~ParsableJson~GenReport}"
+        }
+    }
+  ]
+}
