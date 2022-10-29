@@ -5,7 +5,8 @@
       "request": {
         "method": "GET",
         "endPoint": "/v2/pet/findByStatus",
-        "requestDataParams": "{\"status\":  \"pending\"}"
+        "requestDataParams": {"status":  "pending"},
+        "headers" : {}
       },
       "response": {
         "responseStatus": 200,
@@ -18,7 +19,8 @@
       "request": {
         "method": "GET",
         "endPoint": "/v2/pet/findByStatus",
-        "requestDataParams": "{\"status\":  \"available\"}"
+        "requestDataParams": {"status":  "available"},
+        "headers" : { }
       },
       "response": {
         "responseStatus": 200,
@@ -31,7 +33,8 @@
       "request": {
         "method": "GET",
         "endPoint": "/v2/pet/findByStatus",
-        "requestDataParams": "{\"status\":  \"sold\"}"
+        "requestDataParams": {"status":  "sold"},
+        "headers" : { }
       },
       "response": {
         "responseStatus": 200,

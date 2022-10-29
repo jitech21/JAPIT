@@ -5,7 +5,8 @@
         "request": {
           "method": "GET",
           "endPoint": "/get",
-          "requestDataParams": "{\"test\":  \"test\"}"
+          "requestDataParams": {"test":  "test"},
+          "headers" : {}
         },
         "response": {
           "responseStatus": 200,

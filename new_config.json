@@ -1,0 +1,36 @@
+[
+  {
+    "request": {
+      "method": "GET",
+      "endPoint": "http://localhost:12000/get?test=test",
+      "requestData": "",
+      "responseStatus": 200,
+      "nameTestSuite": "/get",
+      "nameTestCase": "/get",
+      "timeoutForActionSec": 10,
+      "validationRules": "Json~GenReport"
+    },
+    "data": [
+      {
+        "key": "test",
+        "valueType": "Text",
+        "value": "text"
+      }, {
+        "key" : "test21",
+        "valueType": "Number",
+        "value": 21,
+        "max": 22,
+        "min": 21,
+        "type": "int"
+      },{
+        "key": "testArray",
+        "valueType": "array",
+        "value": "[\"test\"]"
+      },{
+        "key": "testObject",
+        "valueType": "List",
+        "value": "{\"test\": \"test\"}"
+      }
+    ]
+  }
+]
