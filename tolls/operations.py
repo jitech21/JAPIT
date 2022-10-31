@@ -19,12 +19,18 @@ class Operations:
 
     def HeadersLoader(header, findString, replaceData):
         returnHeader = {}
+        if 'cookies' in header:
+            headerData = header['cookies']
+        elif 'headers' in header:
+            headerData = header['headers']
+        else:
+            return
         if replaceData != '':
             replaceData = replaceData['text']
             if 'access_token' in replaceData:
-                replaceData = replaceData['access_token']
-        for key, val in header.items():
+                replaceData = json.loads(replaceData)['access_token']
 
+        for key, val in headerData.items():
             findIn = ''
             if 'Authorization' in key:
                 findIn = val
@@ -58,17 +64,19 @@ class Operations:
 
     ## This action perform communication via requests
     def Request(urlApi, responseNumber, timeoutForAction, methodType, headers, jsonReq=None, cookies=None):
-        session = ''
         try:
+            params = jsonReq
+            if methodType == "POST":
+                params = None
             response = requests.request(
                 method=methodType,
                 url=urlApi,
                 cookies=cookies,
+                params=params,
                 data=jsonReq,
                 headers=headers,
                 timeout=timeoutForAction
             )
-            # session = requests.Session()
 
         except Exception as e:
             return {
@@ -77,13 +85,11 @@ class Operations:
             }
         else:
             if int(responseNumber) == response.status_code:
-                # print(response.cookies)
-                # session_id = response.json().get("value")
-                # session.headers.update({"api-session-id": session_id})
                 return {
-                    "text": response.json(),
+                    "text": response.text,
+                    "json": response.json(),
                     "status_code": response.status_code,
-                    "session": session
+                    "cookies": response.cookies
                 }
             else:
                 return {

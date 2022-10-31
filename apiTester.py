@@ -72,16 +72,11 @@ if __name__ == "__main__":
     ## Load data from config file
     loadedData = Operations.LoadTestData(args)
     authValidToken = ""
-
+    cookies = None
     returnToken = ""
     if 'authentications' in loadedData:
         for auth in loadedData['authentications']:
             requestDataParams = None
-            # authValidToken = {
-            #     'cookies':None,
-            #     'text':None,
-            #     'status_code':''
-            # }
             if 'returnToken' in auth['response']:
                 returnToken = auth['response']['returnToken']
             if 'requestDataParams' in auth['request']:
@@ -98,16 +93,15 @@ if __name__ == "__main__":
                 timeoutForAction=auth['response']['timeoutForActionSec'],
                 responseValidations=auth['response']['validationRules'],
                 apiNameTestSuite=auth['response']['nameTestSuite'],
-                headers=headersLoader(
-                    header=auth['request']['headers'],
+                headers=Operations.HeadersLoader(
+                    header=auth['request'],
                     findString=returnToken,
                     replaceData=authValidToken
                 )
                 # cookies=authValidToken['cookies']
             )
-            print(authValidToken)
-
-    # TODO: keycloak one url and another url and then session number
+    if 'cookies' in authValidToken:
+        cookies = authValidToken['cookies']
     for config in loadedData['endPoints']:
         ApiTester(
             endPoint=loadedData['url'] + config['request']['endPoint'],
@@ -121,8 +115,7 @@ if __name__ == "__main__":
                 header=config['request']['headers'],
                 findString=returnToken,
                 replaceData=authValidToken
-            )
+            ),
+            cookies=cookies
         )
         time.sleep(1)
-
-        # TODO: retest splitting
