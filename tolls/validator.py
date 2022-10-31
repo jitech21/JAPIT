@@ -65,10 +65,6 @@ class Validator:
             testResult=errorMessage
         )
 
-    # skip internal validation serve the content in return
-    def CaseSkipValidation(self):
-        return json.loads(self.response['text'])['access_token']
-
     ## validate text
     def CaseText(self):
         # TODO: TBD

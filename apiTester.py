@@ -2,7 +2,6 @@
 API testing tool
 '''
 
-# TODO: retest all type of requests
 # TODO: Create documentation on my own Web site
 # TODO. graph around dependency and visual view what working on
 # > testcase data come
@@ -53,6 +52,7 @@ def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAct
     )
     runtime = time.time() - startTime
 
+    # skip internal validation serve the content in return
     if 'SkipValidationReturnData' in responseValidations:
         return responseData
     Validator(
@@ -91,7 +91,7 @@ if __name__ == "__main__":
                 jsonReqParams=requestDataParams,
                 responseNumber=auth['response']['responseStatus'],
                 timeoutForAction=auth['response']['timeoutForActionSec'],
-                responseValidations=auth['response']['validationRules'],
+                responseValidations=auth['response']['validationRules']+"~SkipValidationReturnData",
                 apiNameTestSuite=auth['response']['nameTestSuite'],
                 headers=Operations.HeadersLoader(
                     header=auth['request'],
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     if 'cookies' in authValidToken:
         cookies = authValidToken['cookies']
     for config in loadedData['endPoints']:
-        ApiTester(
+        returnData = ApiTester(
             endPoint=loadedData['url'] + config['request']['endPoint'],
             methodType=config['request']['method'],
             jsonReqParams=config['request']['requestDataParams'],
@@ -118,4 +118,6 @@ if __name__ == "__main__":
             ),
             cookies=cookies
         )
+        if 'SkipValidationReturnData' in config['response']['validationRules']:
+            print(returnData)
         time.sleep(1)
