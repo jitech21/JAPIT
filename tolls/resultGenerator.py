@@ -3,11 +3,12 @@ from datetime import datetime
 from tolls.operations import Operations
 import os
 
+
 ## junit XML report
 class ResultGenerator:
 
-    def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, duration, testResult,
-                 genXMLReport=False):
+    def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, testResult,
+                 genXMLReport=False, duration=0.0):
         self.parsedResult = None
         self.testSuiteName = testSuiteName
         self.testCaseName = testCaseName
@@ -38,6 +39,8 @@ class ResultGenerator:
         if 'ERROR:' in self.testResult:
             errorMessage = self.testResult
         elif 'FAILURE:' in self.testResult:
+            errorMessage = self.testResult
+        elif 'DISABLED:' in self.testResult:
             errorMessage = self.testResult
         # name of temp file log _%H:%M
         fileName = str(datetime.now().strftime("%Y-%m-%d")) + '.log'

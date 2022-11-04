@@ -12,7 +12,7 @@
         "responseStatus": 200,
         "nameTestSuite": "/v2/pet/findByStatusPending",
         "timeoutForActionSec": 10,
-        "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport"
+        "validationRules": "ResponseStatus~ResponseTimeSec=1~PreviousDataValidation~ParsableJson~GenReport"
       }
     },
     {
@@ -26,7 +26,7 @@
         "responseStatus": 200,
         "nameTestSuite": "/v2/pet/findByStatusAvailable",
         "timeoutForActionSec": 10,
-        "validationRules": "ResponseStatus~ParsableJson~GenReport"
+        "validationRules": "ResponseStatus~ResponseTimeSec=1~ParsableJson~GenReport"
       }
     },
     {
@@ -40,7 +40,7 @@
         "responseStatus": 200,
         "nameTestSuite": "/v2/pet/findByStatusSold",
         "timeoutForActionSec": 10,
-        "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport"
+        "validationRules": "ResponseStatus~ResponseTimeSec=0.3~PreviousDataValidation~ParsableJson~GenReport"
       }
     }
   ]

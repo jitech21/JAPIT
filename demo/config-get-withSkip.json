@@ -1,0 +1,20 @@
+{
+  "url": "http://localhost:12000",
+  "endPoints": [
+      {
+        "skipped":"This test case was skipped",
+        "request": {
+          "method": "GET",
+          "endPoint": "/get",
+          "requestDataParams": {"test":  "test"},
+          "headers" : {}
+        },
+        "response": {
+          "responseStatus": 200,
+          "nameTestSuite": "/get",
+          "timeoutForActionSec": 10,
+          "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport"
+        }
+    }
+  ]
+}

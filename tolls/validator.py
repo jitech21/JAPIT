@@ -3,6 +3,7 @@ import os
 from tolls.resultGenerator import ResultGenerator
 from tolls.operations import Operations
 
+
 ### Class validate response
 class Validator:
     def __init__(self, response, responseValidationRules="", duration=0.0, testSuiteName="", testCaseName=""):
@@ -11,11 +12,35 @@ class Validator:
         self.testCaseName = testCaseName
         self.testSuiteName = testSuiteName
         responseValidationRules = responseValidationRules.split('~')
-        if len(responseValidationRules) == 1:
-            getattr(self, 'Case' + responseValidationRules[0])()
-        else:
-            for validationRules in responseValidationRules:
+        for validationRules in responseValidationRules:
+            if "ResponseTimeSec" in validationRules:
+                ResponseTimeSec = validationRules.split('=')
+                self.CaseResponseReturnTo(float(ResponseTimeSec[1]))
+            else:
                 getattr(self, 'Case' + validationRules)()
+
+    def CaseSkipRun(self):
+        ResultGenerator(
+            nameReportFolder="reports/",
+            nameReportFile=self.testCaseName,
+            testSuiteName=self.testSuiteName,
+            testCaseName=self.testCaseName + " - This testcase was skipped",
+            testResult=self.response
+        )
+
+    def CaseResponseReturnTo(self, time):
+        errorMessage = ''
+        if time <= self.duration:
+            errorMessage = "FAILURE: The response returns with bigger time. (defined: " + str(
+                time) + "sec, actual: " + str(self.duration) + " sec) "
+        ResultGenerator(
+            nameReportFolder="reports/",
+            nameReportFile=self.testCaseName,
+            testSuiteName=self.testSuiteName,
+            testCaseName=self.testCaseName + " - ResponseReturnTo",
+            duration=0.0,
+            testResult=errorMessage
+        )
 
     ## Validator if response come
     def CaseResponseStatus(self):
@@ -38,8 +63,9 @@ class Validator:
         createNewFile = self.testSuiteName.replace("/", "-")
         folderName = "apisResponse/" + createNewFile  # + "/response"
         Operations.GenFolder(folderName)
-        Operations.WriteOpenData(fileName=createNewFile + '.json', folderName=folderName, writeData=self.response['text'],
-                      openType="w")
+        Operations.WriteOpenData(fileName=createNewFile + '.json', folderName=folderName,
+                                 writeData=self.response['text'],
+                                 openType="w")
 
     ## Validator if data should be same
     def CasePreviousDataValidation(self):

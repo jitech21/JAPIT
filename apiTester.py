@@ -1,10 +1,8 @@
-'''
+"""
 API testing tool
-'''
+"""
 
-# TODO: Create documentation on my own Web site
 # TODO. graph around dependency and visual view what working on
-# > testcase data come
 # > testcase validate structure
 # >> text
 # >> number
@@ -13,9 +11,10 @@ API testing tool
 # >> max , min, mimeType, of number
 # required keys in response
 # TODO: generator request from swagger json file
-#TODO: GraphQL implementaion
-# -> https://www.geeksforgeeks.org/get-and-post-requests-in-graphql-api-using-python-requests/
-# -> https://lucasconstantino.github.io/graphiql-online/
+# TODO: Generator config file
+# > Update/show structure view
+
+# TODO: Bulk config file loader => implement via jenkins
 
 try:
     import requests
@@ -36,32 +35,42 @@ try:
 except ImportError:
     raise Exception('Module install via: pip install junit-xml')
 
+
 ## base entry method to API testing
 def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAction, responseValidations,
-              apiNameTestSuite="",  headers="", cookies=None):
+              apiNameTestSuite="", headers="", cookies=None, skip=None):
     responseData = ""
-    startTime = time.time()
-    responseData = Operations.Request(
-        urlApi=endPoint,
-        jsonReq=jsonReqParams,
-        responseNumber=responseNumber,
-        timeoutForAction=timeoutForAction,
-        methodType=methodType,
-        headers=headers,
-        cookies=cookies
-    )
-    runtime = time.time() - startTime
 
     # skip internal validation serve the content in return
     if 'SkipValidationReturnData' in responseValidations:
         return responseData
-    Validator(
-        response=responseData,
-        responseValidationRules=responseValidations,
-        duration=runtime,
-        testSuiteName=apiNameTestSuite,
-        testCaseName=apiNameTestSuite
-    )
+    elif skip is not None:
+        Validator(
+            response="DISABLED: "+skip,
+            responseValidationRules="SkipRun~GenReport",
+            testSuiteName=apiNameTestSuite,
+            testCaseName=apiNameTestSuite
+        )
+    else:
+        startTime = time.time()
+        responseData = Operations.Request(
+            urlApi=endPoint,
+            jsonReq=jsonReqParams,
+            responseNumber=responseNumber,
+            timeoutForAction=timeoutForAction,
+            methodType=methodType,
+            headers=headers,
+            cookies=cookies
+        )
+        runtime = time.time() - startTime
+        Validator(
+            response=responseData,
+            responseValidationRules=responseValidations,
+            duration=runtime,
+            testSuiteName=apiNameTestSuite,
+            testCaseName=apiNameTestSuite
+        )
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -91,7 +100,7 @@ if __name__ == "__main__":
                 jsonReqParams=requestDataParams,
                 responseNumber=auth['response']['responseStatus'],
                 timeoutForAction=auth['response']['timeoutForActionSec'],
-                responseValidations=auth['response']['validationRules']+"~SkipValidationReturnData",
+                responseValidations=auth['response']['validationRules'] + "~SkipValidationReturnData",
                 apiNameTestSuite=auth['response']['nameTestSuite'],
                 headers=Operations.HeadersLoader(
                     header=auth['request'],
@@ -103,6 +112,9 @@ if __name__ == "__main__":
     if 'cookies' in authValidToken:
         cookies = authValidToken['cookies']
     for config in loadedData['endPoints']:
+        skipDescription = None
+        if 'skipped' in config:
+            skipDescription = config['skipped']
         returnData = ApiTester(
             endPoint=loadedData['url'] + config['request']['endPoint'],
             methodType=config['request']['method'],
@@ -116,7 +128,8 @@ if __name__ == "__main__":
                 findString=returnToken,
                 replaceData=authValidToken
             ),
-            cookies=cookies
+            cookies=cookies,
+            skip=skipDescription
         )
         if 'SkipValidationReturnData' in config['response']['validationRules']:
             print(returnData)

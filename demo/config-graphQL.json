@@ -1,0 +1,19 @@
+{
+  "url": "https://countries.trevorblades.com/",
+  "endPoints": [
+      {
+        "request": {
+          "method": "POST",
+          "endPoint": "",
+          "requestDataParams": {"query":  "query {countries{ name}}"},
+          "headers" : {}
+        },
+        "response": {
+          "responseStatus": 200,
+          "nameTestSuite": "countries-GraPhQLData",
+          "timeoutForActionSec": 10,
+          "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport"
+        }
+    }
+  ]
+}

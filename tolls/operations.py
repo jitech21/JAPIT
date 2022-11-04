@@ -66,14 +66,26 @@ class Operations:
     def Request(urlApi, responseNumber, timeoutForAction, methodType, headers, jsonReq=None, cookies=None):
         try:
             params = jsonReq
+            data = jsonReq
             if methodType == "POST":
                 params = None
+                jsongraphQL = None
+                data = jsonReq
+            elif methodType == "GET":
+                params = jsonReq
+                data = None
+                jsongraphQL = None
+            if "query" in jsonReq:
+                jsongraphQL = jsonReq
+                params = None
+                data = None
             response = requests.request(
                 method=methodType,
                 url=urlApi,
                 cookies=cookies,
                 params=params,
-                data=jsonReq,
+                data=data,
+                json=jsongraphQL,
                 headers=headers,
                 timeout=timeoutForAction
             )
@@ -87,7 +99,6 @@ class Operations:
             if int(responseNumber) == response.status_code:
                 return {
                     "text": response.text,
-                    "json": response.json(),
                     "status_code": response.status_code,
                     "cookies": response.cookies
                 }
