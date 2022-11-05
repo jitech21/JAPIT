@@ -17,6 +17,11 @@ API testing tool
 # TODO: Bulk config file loader => implement via jenkins
 # TODO: Retest loading auth params via console param stringify
 
+# TODO: run test with unique build number and add to the documantaion the build number
+#  TODO: implement jenkins job to run the test and generate the report and send it to the email
+
+# TODO: Add console messsage by endpoint and method type
+
 try:
     import requests
     import argparse
@@ -39,7 +44,7 @@ except ImportError:
 
 ## base entry method to API testing
 def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAction, responseValidations,
-              apiNameTestSuite="", headers="", cookies=None, skip=None):
+              apiNameTestSuite="", headers="", cookies=None, skip=None,buildNumber=0):
     responseData = ""
 
     # skip internal validation serve the content in return
@@ -69,7 +74,8 @@ def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAct
             responseValidationRules=responseValidations,
             duration=runtime,
             testSuiteName=apiNameTestSuite,
-            testCaseName=apiNameTestSuite
+            testCaseName=apiNameTestSuite,
+            buildNumber=buildNumber
         )
 
 
@@ -77,7 +83,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--ConfFile', required=True, help="This file contains all previous parameters for test",
                         type=str)
-    parser.add_argument('--AuthParams', required=False, help="This file contains all previous parameters for test",
+    parser.add_argument('--AuthParams', required=False, help="This params contains stringify auth params",
+                        type=str)
+    parser.add_argument('--BuildNumber', required=False, help="This number is unique build number for each run",
                         type=str)
 
     args = parser.parse_args()

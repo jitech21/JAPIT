@@ -1,0 +1,90 @@
+// Global variable
+import java.text.SimpleDateFormat
+def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
+def date = new Date()
+def timestamp = dateFormat.format(date)
+def buildNumber = currentBuild.number
+String[] RunParamters = []
+CurrentErrors = 0
+if (params.Configurations != '')
+{
+    RunParamters = params.Configurations.replace(':selected','').split(',')
+}
+// TODO: create this file in the workspace
+stage(String.format('Clone Git')){
+    node{
+        echo 'Clone Git'
+        // change if possible
+        git credentialsId: 'github', url: 'git@github.com:jitech21/apiTEster.git'
+        // echo 'Git pull'
+        // sh 'git pull'
+        // echo 'Git fetch'
+        // sh 'git fetch'
+
+    }
+}
+for (runParamter in RunParamters)
+{
+    tmpRunParametr = runParamter.split('~')
+    configuration = tmpRunParametr[0]
+    stage(String.format('Api Test website: %s', configuration)){
+        parallel (
+            catchError{
+                timeout(time: params.TimeoutJob, unit: 'SECONDS') {
+                    node{
+                        try {
+                            echo String.format('Test web: %s', web )
+                            echo 'RUN SCRIPT'
+                            echo 'python apiTester.py --buildNumber '+buildNumber + ' --configurations '+configuration
+                            sh 'python apiTester.py --buildNumber '+buildNumber + ' --configurations '+configuration
+                        } catch (e) {
+                            currentBuild.result = "Connection detection: "+web+" -FAILED"
+                            notifyFailed(web)
+                            CurrentErrors = CurrentErrors+1
+                            throw e
+                        }
+                    }
+                }
+            }
+        )
+    }
+}
+stage('Reports') {
+    node {
+        catchError(buildResult: 'UNSTABLE', stageResult: 'SUCCESS') {
+        // TODO: implement result load only in this run job
+            def now = new Date()
+            sh 'python genrateIndexReport.py --reportFolder "reports" --buildNumber '+buildNumber
+            echo String.format('Current error/s: %s', CurrentErrors )
+            junit keepLongStdio: true, skipPublishingChecks: true, testResults: 'reports/'+timestamp+'-'+buildNumber+'.xml'
+            if(CurrentErrors == 0){
+              currentBuild.result = 'SUCCESS'
+            } else if(currentBuild.result == 'UNSTABLE'){
+              currentBuild.result = 'SUCCESS'
+            } else {
+              currentBuild.result = 'ERROR'
+            }
+        }
+    }
+}
+
+def notifyFailed(domain) {
+    emailext (
+        to: 'jitech@jitech.cz',
+        subject: "FAILED: API Job '${env.JOB_NAME} - ${env.BUILD_NUMBER}'",
+        mimeType: 'text/html',
+        body: """<p>FAILED: Job #${env.JOB_NAME} - ${env.BUILD_NUMBER} for domain: '${domain}'</p>
+            <p>Check console output at (<a href='${env.BUILD_URL}'>${env.JOB_NAME} - [${env.BUILD_NUMBER}]</a>)</p>""",
+        replyTo: '$DEFAULT_REPLYTO'
+    )
+}
+def notifySuccessful(domain) {
+    emailext (
+        to: 'jitech@jitech.cz',
+        subject: "SUCCESSFUL: API Job '${env.JOB_NAME} - ${env.BUILD_NUMBER}'",
+        mimeType: 'text/html',
+        body: """<p>SUCCESSFUL: Job #${env.JOB_NAME} - [${env.BUILD_NUMBER}] for domain: ${domain}</p>
+            <p>Check console output at (<a href='${env.BUILD_URL}'>${env.JOB_NAME} - ${env.BUILD_NUMBER}</a>)</p>""",
+        replyTo: '$DEFAULT_REPLYTO'
+        )
+}
