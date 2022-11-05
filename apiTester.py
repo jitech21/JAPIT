@@ -15,6 +15,7 @@ API testing tool
 # > Update/show structure view
 
 # TODO: Bulk config file loader => implement via jenkins
+# TODO: Retest loading auth params via console param stringify
 
 try:
     import requests
@@ -76,6 +77,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--ConfFile', required=True, help="This file contains all previous parameters for test",
                         type=str)
+    parser.add_argument('--AuthParams', required=False, help="This file contains all previous parameters for test",
+                        type=str)
 
     args = parser.parse_args()
     ## Load data from config file
@@ -89,7 +92,10 @@ if __name__ == "__main__":
             if 'returnToken' in auth['response']:
                 returnToken = auth['response']['returnToken']
             if 'requestDataParams' in auth['request']:
-                requestDataParams = auth['request']['requestDataParams']
+                if 'authParams' in loadedData:
+                    requestDataParams = loadedData['authParams']
+                else:
+                    requestDataParams = auth['request']['requestDataParams']
             if 'authUrl' in loadedData:
                 endPointUrl = loadedData['authUrl']
             else:
@@ -111,12 +117,12 @@ if __name__ == "__main__":
             )
     if 'cookies' in authValidToken:
         cookies = authValidToken['cookies']
-    for config in loadedData['endPoints']:
+    for config in loadedData['config']['endPoints']:
         skipDescription = None
         if 'skipped' in config:
             skipDescription = config['skipped']
         returnData = ApiTester(
-            endPoint=loadedData['url'] + config['request']['endPoint'],
+            endPoint=loadedData['config']['url'] + config['request']['endPoint'],
             methodType=config['request']['method'],
             jsonReqParams=config['request']['requestDataParams'],
             responseNumber=config['response']['responseStatus'],
