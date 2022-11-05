@@ -5,10 +5,16 @@ import requests
 class Operations:
     ## Load Json config file content
     def LoadTestData(args):
+        authParams = {}
+        buildNumber = 0
         if args.ConfFile is not None:
             loadData = Operations.LoadContent(nameReportFolder="", file=args.ConfFile)
-            ConfigFile = json.load(loadData)
-            return ConfigFile
+            configFile = json.load(loadData)
+        elif args.AuthParams is not None:
+            authParams = json.loads(args.AuthParams)
+        elif args.BuildNumber  is not None:
+            buildNumber = args.BuildNumber
+        return {"config": configFile, "authParams": authParams, "buildNumber": buildNumber}
 
     ## Create folder if not exist
     def GenFolder(nameReportFolder):

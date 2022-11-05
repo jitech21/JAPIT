@@ -6,11 +6,12 @@ from tolls.operations import Operations
 
 ### Class validate response
 class Validator:
-    def __init__(self, response, responseValidationRules="", duration=0.0, testSuiteName="", testCaseName=""):
+    def __init__(self, response, responseValidationRules="", duration=0.0, testSuiteName="", testCaseName="", buildNumber=""):
         self.response = response
         self.duration = duration
         self.testCaseName = testCaseName
         self.testSuiteName = testSuiteName
+        self.buildNumber = buildNumber
         responseValidationRules = responseValidationRules.split('~')
         for validationRules in responseValidationRules:
             if "ResponseTimeSec" in validationRules:
@@ -154,6 +155,7 @@ class Validator:
             testCaseName=self.testCaseName,
             duration="",
             testResult="",
-            genXMLReport=True
+            genXMLReport=True,
+            buildNumber=self.buildNumber
         )
         return

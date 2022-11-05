@@ -8,7 +8,7 @@ import os
 class ResultGenerator:
 
     def __init__(self, nameReportFolder, nameReportFile, testSuiteName, testCaseName, testResult,
-                 genXMLReport=False, duration=0.0):
+                 genXMLReport=False, duration=0.0, buildNumber=0):
         self.parsedResult = None
         self.testSuiteName = testSuiteName
         self.testCaseName = testCaseName
@@ -19,21 +19,22 @@ class ResultGenerator:
         if genXMLReport:
             self.genXmlReport(self.genReportFromFolder())
         else:
-            self.genTmpRepostFile()
+            self.genTmpRepostFile(buildNumber)
 
     ## Remove unused file
     def removeLogFileThen(self, nameOfFile):
         now = datetime.now()
         parsedDateName = nameOfFile.replace('.log', '')
         parsedDateName = parsedDateName.replace('reports/', '')
-        if parsedDateName < now.strftime("%Y-%m-%d"):
+        parsedDateName = parsedDateName.split('~')
+        if parsedDateName[0] < now.strftime("%Y-%m-%d"):
             os.remove(nameOfFile)
             print('Remove file: ', nameOfFile)
             return True
         return False
 
     ## Request for generate tmp file
-    def genTmpRepostFile(self):
+    def genTmpRepostFile(self, buildNumber=0):
         Operations.GenFolder(self.nameReportFolder)
         errorMessage = ''
         if 'ERROR:' in self.testResult:
@@ -43,7 +44,7 @@ class ResultGenerator:
         elif 'DISABLED:' in self.testResult:
             errorMessage = self.testResult
         # name of temp file log _%H:%M
-        fileName = str(datetime.now().strftime("%Y-%m-%d")) + '.log'
+        fileName = str(datetime.now().strftime("%Y-%m-%d")) + '~' + str(buildNumber) + '.log'
         data = str(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")) + '~' + str(self.testSuiteName) + '~' + str(
             self.testCaseName) + '~' + str(self.duration) + '~' + str(errorMessage) + '\n'
         Operations.WriteOpenData(fileName=fileName, folderName=self.nameReportFolder, writeData=data, openType='a')
