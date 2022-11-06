@@ -17,9 +17,6 @@ API testing tool
 # TODO: Bulk config file loader => implement via jenkins
 # TODO: Retest loading auth params via console param stringify
 
-# TODO: run test with unique build number and add to the documantaion the build number
-#  TODO: implement jenkins job to run the test and generate the report and send it to the email
-
 # TODO: Add console messsage by endpoint and method type
 
 try:
@@ -44,7 +41,7 @@ except ImportError:
 
 ## base entry method to API testing
 def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAction, responseValidations,
-              apiNameTestSuite="", headers="", cookies=None, skip=None,buildNumber=0):
+              apiNameTestSuite="", headers="", cookies=None, skip=None):
     responseData = ""
 
     # skip internal validation serve the content in return
@@ -143,7 +140,8 @@ if __name__ == "__main__":
                 replaceData=authValidToken
             ),
             cookies=cookies,
-            skip=skipDescription
+            skip=skipDescription,
+            buildNumber=loadedData['buildNumber']
         )
         if 'SkipValidationReturnData' in config['response']['validationRules']:
             print(returnData)
