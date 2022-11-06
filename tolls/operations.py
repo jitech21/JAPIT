@@ -10,9 +10,9 @@ class Operations:
         if args.ConfFile is not None:
             loadData = Operations.LoadContent(nameReportFolder="", file=args.ConfFile)
             configFile = json.load(loadData)
-        elif args.AuthParams is not None:
+        if args.AuthParams is not None:
             authParams = json.loads(args.AuthParams)
-        elif args.BuildNumber  is not None:
+        if args.BuildNumber is not None:
             buildNumber = args.BuildNumber
         return {"config": configFile, "authParams": authParams, "buildNumber": buildNumber}
 

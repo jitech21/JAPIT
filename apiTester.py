@@ -14,11 +14,6 @@ API testing tool
 # TODO: Generator config file
 # > Update/show structure view
 
-# TODO: Bulk config file loader => implement via jenkins
-# TODO: Retest loading auth params via console param stringify
-
-# TODO: Add console messsage by endpoint and method type
-
 try:
     import requests
     import argparse
@@ -41,7 +36,7 @@ except ImportError:
 
 ## base entry method to API testing
 def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAction, responseValidations,
-              apiNameTestSuite="", headers="", cookies=None, skip=None):
+              apiNameTestSuite="", headers="", cookies=None, skip=None, buildNumber=0):
     responseData = ""
 
     # skip internal validation serve the content in return
@@ -66,7 +61,7 @@ def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAct
             cookies=cookies
         )
         runtime = time.time() - startTime
-        Validator(
+        error = Validator(
             response=responseData,
             responseValidationRules=responseValidations,
             duration=runtime,
@@ -74,6 +69,7 @@ def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAct
             testCaseName=apiNameTestSuite,
             buildNumber=buildNumber
         )
+    print("TESTSUITE NAME: " + apiNameTestSuite + ", ENDPOINT: " + endPoint + ", METHOD: " + methodType )
 
 
 if __name__ == "__main__":
@@ -83,7 +79,7 @@ if __name__ == "__main__":
     parser.add_argument('--AuthParams', required=False, help="This params contains stringify auth params",
                         type=str)
     parser.add_argument('--BuildNumber', required=False, help="This number is unique build number for each run",
-                        type=str)
+                        type=int)
 
     args = parser.parse_args()
     ## Load data from config file

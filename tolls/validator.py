@@ -6,7 +6,7 @@ from tolls.operations import Operations
 
 ### Class validate response
 class Validator:
-    def __init__(self, response, responseValidationRules="", duration=0.0, testSuiteName="", testCaseName="", buildNumber=""):
+    def __init__(self, response, responseValidationRules="", duration=0.0, testSuiteName="", testCaseName="", buildNumber=0):
         self.response = response
         self.duration = duration
         self.testCaseName = testCaseName
@@ -26,7 +26,8 @@ class Validator:
             nameReportFile=self.testCaseName,
             testSuiteName=self.testSuiteName,
             testCaseName=self.testCaseName + " - This testcase was skipped",
-            testResult=self.response
+            testResult=self.response,
+            buildNumber=self.buildNumber
         )
 
     def CaseResponseReturnTo(self, time):
@@ -40,7 +41,8 @@ class Validator:
             testSuiteName=self.testSuiteName,
             testCaseName=self.testCaseName + " - ResponseReturnTo",
             duration=0.0,
-            testResult=errorMessage
+            testResult=errorMessage,
+            buildNumber=self.buildNumber
         )
 
     ## Validator if response come
@@ -56,7 +58,8 @@ class Validator:
             testSuiteName=self.testSuiteName,
             testCaseName=self.testCaseName + " - Response come with status: " + str(self.response['status_code']),
             duration=self.duration,
-            testResult=errorMessage
+            testResult=errorMessage,
+            buildNumber=self.buildNumber
         )
 
     ## Create expected data validation file if not exist
@@ -89,7 +92,8 @@ class Validator:
             testSuiteName=self.testSuiteName,
             testCaseName=self.testCaseName + " - validateExpectedData",
             duration=0.0,
-            testResult=errorMessage
+            testResult=errorMessage,
+            buildNumber=self.buildNumber
         )
 
     ## validate text
@@ -123,7 +127,7 @@ class Validator:
         isValidStructure = True
         if 'ERROR:' in self.response['text']:
             errorMessage = self.response['text']
-        elif not validator.CaseIsJSON():
+        elif not validator:
             errorMessage = "FAILURE: The response is not in json format."
             isValidStructure = False
         ResultGenerator(
@@ -132,7 +136,8 @@ class Validator:
             testSuiteName=self.testSuiteName,
             testCaseName=self.testCaseName + " - validateJsonStructure",
             duration=0.0,
-            testResult=errorMessage
+            testResult=errorMessage,
+            buildNumber=self.buildNumber
         )
         return isValidStructure
 
