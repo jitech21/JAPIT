@@ -17,7 +17,7 @@ class ResultGenerator:
         self.nameReportFolder = nameReportFolder
         self.nameReportFile = ""
         if genXMLReport:
-            self.genXmlReport(self.genReportFromFolder())
+            self.genXmlReport(self.genReportFromFolder(),buildNumber)
         else:
             self.genTmpRepostFile(buildNumber)
 
@@ -60,8 +60,8 @@ class ResultGenerator:
                 return testSuite
 
     ## generate junit xml report file
-    def genXmlReport(self, TestSuiteData):
-        filename = self.nameReportFile.replace("/", "-")
+    def genXmlReport(self, TestSuiteData,buildNumber=0):
+        filename = str(datetime.now().strftime("%Y-%m-%d")) + '~' + str(buildNumber) + '.xml'
         with open(
                 self.nameReportFolder + filename,
                 'w') as file:

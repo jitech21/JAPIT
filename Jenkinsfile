@@ -15,7 +15,7 @@ stage(String.format('Clone Git')){
     node{
         echo 'Clone Git'
         // change if possible
-        git credentialsId: 'github', url: 'git@github.com:jitech21/apiTEster.git'
+        git branch: 'main', url: 'https://github.com/jitech21/apiTEster.git'
         // echo 'Git pull'
         // sh 'git pull'
         // echo 'Git fetch'
@@ -23,40 +23,34 @@ stage(String.format('Clone Git')){
 
     }
 }
-for (runParamter in RunParamters)
+for (configuration in RunParamters)
 {
-    tmpRunParametr = runParamter.split('~')
-    configuration = tmpRunParametr[0]
-    stage(String.format('Api Test website: %s', configuration)){
-        parallel (
+    stage(String.format('Api Test: %s', configuration)){
+        //parallel (
             catchError{
-                timeout(time: params.TimeoutJob, unit: 'SECONDS') {
-                    node{
-                        try {
-                            echo String.format('Test web: %s', web )
-                            echo 'RUN SCRIPT'
-                            echo 'python apiTester.py --buildNumber '+buildNumber + ' --configurations '+configuration
-                            sh 'python apiTester.py --buildNumber '+buildNumber + ' --configurations '+configuration
-                        } catch (e) {
-                            currentBuild.result = "Connection detection: "+web+" -FAILED"
-                            notifyFailed(web)
-                            CurrentErrors = CurrentErrors+1
-                            throw e
-                        }
+                node{
+                    try {
+                        echo String.format('Test API: %s', configuration )
+                        echo 'RUN SCRIPT'
+                        echo 'python apiTester.py --BuildNumber '+buildNumber + ' --ConfFile "'+configuration+'"'
+                        sh 'python apiTester.py --BuildNumber '+buildNumber + ' --ConfFile "'+configuration+'"'
+                    } catch (e) {
+                        currentBuild.result = "Connection detection: "+configuration+" - FAILED"
+                        notifyFailed(configuration)
+                        CurrentErrors = CurrentErrors+1
+                        throw e
                     }
                 }
             }
-        )
+        // )
     }
 }
 stage('Reports') {
     node {
         catchError(buildResult: 'UNSTABLE', stageResult: 'SUCCESS') {
-        // TODO: implement result load only in this run job
-            def now = new Date()
-            sh 'python genrateIndexReport.py --reportFolder "reports" --buildNumber '+buildNumber
-            echo String.format('Current error/s: %s', CurrentErrors )
-            junit keepLongStdio: true, skipPublishingChecks: true, testResults: 'reports/'+timestamp+'-'+buildNumber+'.xml'
+            // echo String.format('Current error/s: %s', CurrentErrors )
+            echo 'reports/'+timestamp+'~'+buildNumber+'.xml'
+            junit keepLongStdio: true, skipPublishingChecks: true, testResults: 'reports/'+timestamp+'~'+buildNumber+'.xml'
             if(CurrentErrors == 0){
               currentBuild.result = 'SUCCESS'
             } else if(currentBuild.result == 'UNSTABLE'){
