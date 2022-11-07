@@ -1,1 +1,4 @@
 /.idea/
+/reports/*.xml
+/reports/*.log
+/app/*
