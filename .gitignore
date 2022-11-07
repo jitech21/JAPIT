@@ -1,4 +1,4 @@
 /.idea/
 /reports/*.xml
 /reports/*.log
-/app/*
+/apisResponse/*/*.json
