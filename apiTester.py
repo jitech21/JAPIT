@@ -9,7 +9,6 @@ API testing tool
 # >> array
 # >> list
 # >> max , min, mimeType, of number
-# required keys in response
 # TODO: generator request from swagger json file
 # TODO: Generator config file
 # > Update/show structure view

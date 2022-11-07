@@ -64,7 +64,7 @@ class ResultGenerator:
         filename = str(datetime.now().strftime("%Y-%m-%d")) + '~' + str(buildNumber) + '.xml'
         with open(
                 self.nameReportFolder + filename,
-                'w') as file:
+                'a') as file:
             TestSuite.to_file(file_descriptor=file, test_suites=TestSuiteData, prettyprint=True)
 
     ## create test suite in junit xml structure
