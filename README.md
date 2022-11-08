@@ -12,7 +12,8 @@ GNU General Public License v3.0
 This python tool is based on the requests python module. This script added validation layer to the standard request/response functionality.  
 
 ## What is it possible to do with this tool:
- - Rest API testing
+ - Method: GET, POST, PUT, DELETE
+ - Rest API testing 
  - SOAP API testing
  - GraphQL API testing
  - Json validation
