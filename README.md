@@ -1,4 +1,4 @@
-# apiTester (v1.0)
+# apiTester (v1.1)
 
 ## License 
 GNU General Public License v3.0
