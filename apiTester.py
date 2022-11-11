@@ -22,8 +22,8 @@ try:
     from sys import exit
     from datetime import timedelta
     from datetime import datetime
-    from tolls.validator import Validator
-    from tolls.operations import Operations
+    from modules.validator import Validator
+    from modules.operations import Operations
 except ImportError:
     raise Exception('Module install via: pip install requests')
 

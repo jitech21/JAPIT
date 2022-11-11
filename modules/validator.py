@@ -1,7 +1,7 @@
 import json
 import os
-from tolls.resultGenerator import ResultGenerator
-from tolls.operations import Operations
+from modules.resultGenerator import ResultGenerator
+from modules.operations import Operations
 
 
 ### Class validate response
