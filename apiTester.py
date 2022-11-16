@@ -12,6 +12,7 @@ API testing tool
 # TODO: generator request from swagger json file
 # TODO: Generator config file
 # > Update/show structure view
+# TODO Integrate with GitHub ci/cd pipeline / GitLab ci/cd pipeline
 
 try:
     import requests
