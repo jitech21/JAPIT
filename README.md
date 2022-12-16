@@ -1,4 +1,4 @@
-# JAPIT - JAPITester (v1.1)
+# JAPIT - JAPITester (v1.2)
 
 ## License 
 GNU General Public License v3.0
