@@ -39,10 +39,7 @@ def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAct
               apiNameTestSuite="", headers="", cookies=None, skip=None, buildNumber=0):
     responseData = ""
 
-    # skip internal validation serve the content in return
-    if 'SkipValidationReturnData' in responseValidations:
-        return responseData
-    elif skip is not None:
+    if skip is not None:
         Validator(
             response="DISABLED: "+skip,
             responseValidationRules="SkipRun~GenReport",
@@ -61,7 +58,9 @@ def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAct
             cookies=cookies
         )
         runtime = time.time() - startTime
-        error = Validator(
+        # skip internal validation serve the content in return
+
+        Validator(
             response=responseData,
             responseValidationRules=responseValidations,
             duration=runtime,
@@ -69,6 +68,8 @@ def ApiTester(endPoint, methodType, jsonReqParams, responseNumber, timeoutForAct
             testCaseName=apiNameTestSuite,
             buildNumber=buildNumber
         )
+        if 'ReturnData' in responseValidations:
+            return responseData
     print("TESTSUITE NAME: " + apiNameTestSuite + ", ENDPOINT: " + endPoint + ", METHOD: " + methodType )
 
 
@@ -87,11 +88,13 @@ if __name__ == "__main__":
     authValidToken = ""
     cookies = None
     returnToken = ""
+    endPointUrl = None
+    requestDataParams = None
     if 'authentications' in loadedData:
         for auth in loadedData['authentications']:
             requestDataParams = None
-            if 'returnToken' in auth['response']:
-                returnToken = auth['response']['returnToken']
+            if 'returnData' in auth['response']:
+                returnToken = auth['response']['returnData']
             if 'requestDataParams' in auth['request']:
                 if 'authParams' in loadedData:
                     requestDataParams = loadedData['authParams']
@@ -122,10 +125,28 @@ if __name__ == "__main__":
         skipDescription = None
         if 'skipped' in config:
             skipDescription = config['skipped']
+        if 'replaceData' in config['response']:
+            replaceString = config['response']['replaceData']
+        if 'query' in config['request']['requestDataParams'] :
+            if config['request']['requestDataParams']['query'].find('$') != -1:
+                # Implement if it si necessery for Graphql
+                requestDataParams = Operations.MatchValue(loadData=returnData,
+                                                          replaceData=config['request']['requestDataParams'],
+                                                          findString=replaceString)
+        else:
+            requestDataParams = config['request']['requestDataParams']
+
+        if (endPointUrl is None) | ('$' not in config['request']['endPoint']):
+            endPointUrl = loadedData['config']['url'] + config['request']['endPoint']
+        else:
+            endPointUrl = Operations.MatchValue(loadData=returnData, replaceData=loadedData['config']['url'] + config['request']['endPoint'],
+                                                findString=replaceString)
+            endPointUrl = endPointUrl[replaceString.replace("$","")]
+
         returnData = ApiTester(
-            endPoint=loadedData['config']['url'] + config['request']['endPoint'],
+            endPoint=endPointUrl,
             methodType=config['request']['method'],
-            jsonReqParams=config['request']['requestDataParams'],
+            jsonReqParams=requestDataParams,
             responseNumber=config['response']['responseStatus'],
             timeoutForAction=config['response']['timeoutForActionSec'],
             responseValidations=config['response']['validationRules'],
@@ -139,6 +160,7 @@ if __name__ == "__main__":
             skip=skipDescription,
             buildNumber=loadedData['buildNumber']
         )
+
         if 'SkipValidationReturnData' in config['response']['validationRules']:
             print(returnData)
         time.sleep(1)

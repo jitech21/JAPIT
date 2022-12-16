@@ -126,6 +126,7 @@ class Validator:
         validator = Validator(response=self.response['text'], responseValidationRules="IsJSON")
         isValidStructure = True
         if 'ERROR:' in self.response['text']:
+            print("ERROR: " + self.response['text'])
             errorMessage = self.response['text']
         elif not validator:
             errorMessage = "FAILURE: The response is not in json format."
@@ -163,4 +164,6 @@ class Validator:
             genXMLReport=True,
             buildNumber=self.buildNumber
         )
+        return
+    def CaseReturnData(self):
         return

@@ -14,6 +14,35 @@
           "timeoutForActionSec": 10,
           "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport"
         }
+    },
+    {
+        "request": {
+          "method": "POST",
+          "endPoint": "",
+          "requestDataParams": {"query":  "query {countries{ filter: { name: { eq: '' } }}}"},
+          "headers" : {}
+        },
+        "response": {
+          "responseStatus": 200,
+          "nameTestSuite": "countries-GraPhQLData",
+          "timeoutForActionSec": 10,
+          "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport~ReturnData",
+          "replaceData": "$name"
+        }
+    },
+    {
+        "request": {
+          "method": "POST",
+          "endPoint": "",
+          "requestDataParams": {"query":  "query {countries{ name: $name}}"},
+          "headers" : {}
+        },
+        "response": {
+          "responseStatus": 200,
+          "nameTestSuite": "countries-GraPhQLData",
+          "timeoutForActionSec": 10,
+          "validationRules": "ResponseStatus~PreviousDataValidation~ParsableJson~GenReport"
+        }
     }
   ]
 }

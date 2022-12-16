@@ -24,31 +24,13 @@ class Operations:
         return nameReportFolder
 
     def HeadersLoader(header, findString, replaceData):
-        returnHeader = {}
         if 'cookies' in header:
             headerData = header['cookies']
         elif 'headers' in header:
             headerData = header['headers']
         else:
             return
-        if replaceData != '':
-            replaceData = replaceData['text']
-            if 'access_token' in replaceData:
-                replaceData = json.loads(replaceData)['access_token']
-
-        for key, val in headerData.items():
-            findIn = ''
-            if 'Authorization' in key:
-                findIn = val
-            elif 'Cookie' in key:
-                findIn = val
-
-            if findString in findIn:
-                findIn = findIn.replace(findString, replaceData)
-                returnHeader[key] = findIn
-            else:
-                returnHeader[key] = val
-        return returnHeader
+        return Operations.MatchValue(replaceData,headerData,findString)
 
     ## Write tmp log data file
     def WriteOpenData(fileName, folderName, writeData, openType="w"):
@@ -72,25 +54,21 @@ class Operations:
     def Request(urlApi, responseNumber, timeoutForAction, methodType, headers, jsonReq=None, cookies=None):
         try:
             params = jsonReq
-            data = jsonReq
+
             if methodType == "POST":
                 params = None
-                jsongraphQL = None
-                data = jsonReq
+                jsongraphQL = jsonReq
             elif methodType == "GET":
                 params = jsonReq
-                data = None
                 jsongraphQL = None
             if "query" in jsonReq:
                 jsongraphQL = jsonReq
                 params = None
-                data = None
             response = requests.request(
                 method=methodType,
                 url=urlApi,
                 cookies=cookies,
                 params=params,
-                data=data,
                 json=jsongraphQL,
                 headers=headers,
                 timeout=timeoutForAction
@@ -112,5 +90,31 @@ class Operations:
                 return {
                     "text": "FAILURE: API endpoint: " + str(urlApi) + " returned this response status_code: " + str(
                         response.status_code),
-                    "status_code": response.status_code
+                    "status_code": responseNumber
                 }
+
+    def MatchValue(loadData,replaceData,findString):
+        returnHeader = {}
+        if loadData != '':
+            loadData = json.loads(loadData['text'])
+            if 'access_token' in loadData:
+                loadData = loadData['access_token']
+            elif 'data' in loadData:
+                loadData = loadData['data']
+
+        for key, val in loadData.items():
+            findIn = ''
+            if 'Authorization' in key:
+                findIn = val
+            elif 'Cookie' in key:
+                findIn = val
+            elif findString.replace('$', '') in key:
+                loadData = str(loadData[findString.replace('$', '')])
+                findIn = replaceData
+
+            if findString in findIn:
+                findIn = findIn.replace(findString, loadData)
+                returnHeader[key] = findIn
+            else:
+                returnHeader[key] = val
+        return returnHeader

@@ -1,0 +1,54 @@
+  {
+    "url": "https://petstore.swagger.io",
+    "endPoints": [
+      {
+      "request": {
+        "method": "POST",
+        "endPoint": "/v2/pet",
+        "requestDataParams": {
+          "id": 21,
+          "category": {
+            "id": 0,
+            "name": "test"
+          },
+          "name": "test21",
+          "photoUrls": [
+            "string"
+          ],
+          "tags": [
+            {
+              "id": 0,
+              "name": "test"
+            }
+          ],
+          "status": "available"
+        },
+        "headers" : {
+          "accept": "application/json",
+          "Content-Type": "application/json"
+        }
+      },
+      "response": {
+        "responseStatus": 200,
+        "nameTestSuite": "CreatePet",
+        "timeoutForActionSec": 10,
+        "validationRules": "ResponseStatus~ResponseTimeSec=1~GenReport~ReturnData",
+        "replaceData": "$id"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "endPoint": "/v2/pet/$id",
+        "requestDataParams": {},
+        "headers" : { }
+      },
+      "response": {
+        "responseStatus": 200,
+        "nameTestSuite": "FindPetById",
+        "timeoutForActionSec": 10,
+        "validationRules": "ResponseStatus~ResponseTimeSec=1~ParsableJson~GenReport"
+      }
+    }
+  ]
+}

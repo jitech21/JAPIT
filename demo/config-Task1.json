@@ -1,0 +1,64 @@
+  {
+    "url": "https://petstore.swagger.io",
+    "endPoints": [
+      {
+      "request": {
+        "method": "POST",
+        "endPoint": "/v2/pet",
+        "requestDataParams": {
+          "id": 1,
+          "category": {
+            "id": 0,
+            "name": "string"
+          },
+          "name": "doggie",
+          "photoUrls": [
+            "string"
+          ],
+          "tags": [
+            {
+              "id": 0,
+              "name": "string"
+            }
+          ],
+          "status": "available"
+        },
+        "headers" : {}
+      },
+      "response": {
+        "responseStatus": 200,
+        "nameTestSuite": "/v2/pet/findByStatusPending",
+        "timeoutForActionSec": 10,
+        "validationRules": "ResponseStatus~ResponseTimeSec=1~PreviousDataValidation~ParsableJson~ReturnResponse=id~GenReport"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "endPoint": "/v2/pet/findByStatus",
+        "requestDataParams": {"status":  "available"},
+        "headers" : { }
+      },
+      "response": {
+        "responseStatus": 200,
+        "nameTestSuite": "/v2/pet/findByStatusAvailable",
+        "timeoutForActionSec": 10,
+        "validationRules": "ResponseStatus~ResponseTimeSec=1~ParsableJson~GenReport"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "endPoint": "/v2/pet/findByStatus",
+        "requestDataParams": {"status":  "sold"},
+        "headers" : { }
+      },
+      "response": {
+        "responseStatus": 200,
+        "nameTestSuite": "/v2/pet/findByStatusSold",
+        "timeoutForActionSec": 10,
+        "validationRules": "ResponseStatus~ResponseTimeSec=0.3~PreviousDataValidation~ParsableJson~GenReport"
+      }
+    }
+  ]
+}
